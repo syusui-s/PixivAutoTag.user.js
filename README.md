@@ -14,7 +14,7 @@ Pixivでブックマークタグ付け自動化してくれるUserScriptを書�
 ### Firefoxの場合
 1. pixiv_auto_tag.user.jsをダウンロードしておく
 2. [GreaseMonkey](https://addons.mozilla.org/ja/firefox/addon/greasemonkey/)を導入しておく
-3. <about:addons>を開き、ユーザスクリプトの項目を開く
+3. about:addonsをアドレスバーに入力して開き、ユーザスクリプトの項目を開く
 4. ユーザスクリプトの画面にファイラからpixiv_auto_tag.user.jsをドラッグ・アンド・ドロップする
 5. 確認画面でインストールを押す
 
