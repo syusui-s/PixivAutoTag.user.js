@@ -19,7 +19,7 @@ var parseRules = function(ruleStr) {
 	ruleStr.split('\n').forEach(function(line, i){
 		var parsed = line.split(/\s+/);
 		if        (parsed.length >= 2 && parsed[0].match(/^private$/i)) { // 非公開タグ
-			result.privateRule.push(parsed.slice(1));
+			result.privateRule.push.apply(result.privateRule, parsed.slice(1));
 		} else if (parsed.length >= 3 && parsed[0].match(/^match$/i))   { // 一致
 			result.patternRule.push({
 				tag: parsed[1],
@@ -117,7 +117,7 @@ var autoTag = function() {
 	var tagsExist = Array.prototype.concat.apply([], Array.prototype.slice.call(document.querySelectorAll('#wrapper > div.layout-body > div > section.list-container.tag-container.work-tags-container > div > ul > li')).map(function(item){ return item.textContent.replace(/^\*/, '').split('/'); }));
 
 	// 非公開タグが含まれていた場合、自動で非公開に設定
-	if (tagsExist.some(function(tag){ return rule.privateRule.indexOf(tag) === -1; })) {
+	if (tagsExist.some(function(tag){ return rule.privateRule.indexOf(tag) !== -1; })) {
 		document.querySelector('#wrapper > div.layout-body > section > form > div.submit-container > ul > li:nth-child(2) > label').click();
 	}
 
