@@ -26,7 +26,7 @@ var parseRules = function(ruleStr) {
 					return new RegExp('^' + tag.replace(/[.*+?^${}()|\[\]\\]/g, '\\$&') + '$');
 				})
 			});
-		} else if (parsed.length >= 3 && parsed[0].match(/^pattern$/i))   { // 正規表現
+		} else if (parsed.length >= 3 && parsed[0].match(/^pattern$/i)) { // 正規表現
 			patternRule.push({
 				tag: parsed[1],
 				regexps: parsed.slice(2).map(function(regexStr){
@@ -39,8 +39,9 @@ var parseRules = function(ruleStr) {
 					return regexp;
 				}).filter(function(e){ return e; })
 			});
-		}
-		else { errors.push({lineNumber: (i+1), message: 'CommandError:Invalid Command or Too Few Arguments'}); }
+		} else if (line.match(/^\s*$|^\s*#/)) {                           // 空行 or コメント行
+			return;
+		} else { errors.push({lineNumber: (i+1), message: 'CommandError:Invalid Command or Too Few Arguments'}); }
 	});
 	return { privateRule: privateRule, patternRule: patternRule, errors: errors };
 };
