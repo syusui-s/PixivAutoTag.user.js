@@ -11,44 +11,53 @@ var defaultRuleStr = 'private R-18';
 
 // 設定テキストを解析し、連想配列で返す
 var parseRules = function(ruleStr) {
-	var patternRule   = [];
-	var privateRule = [];
-	var errors      = [];
+	var patternRule    = [];
+	var patternAllRule = [];
+	var privateRule    = [];
+	var errors         = [];
 
-	ruleStr.split('\n').forEach(function(line, i){
+	// 正規表現を表す文字列のリストから、正規表現のリストを作成
+	var createRegExpFromStrAry = function(regexpStrAry, lineNumber) {
+		var regexps = [];
+		regexpStrAry.forEach(function(regexpStr) {
+			try { regexps.push(new RegExp(regexpStr)); }
+			catch (e) { errors.push({ lineNumber: lineNumber, message: ('RegularExpression Error:' + e.name + ':' + e.massage + ', Str:' + regexpStr) }); }
+		});
+		return regexps;
+	};
+
+	// strに完全一致する正規表現を生成
+	var createRegExpPerfectMatch = function(str) {
+		return new RegExp('^' + str.replace(/[.*+?^${}()|\[\]\\]/g, '\\$&') + '$');
+	};
+
+	ruleStr.split('\n').forEach(function(line, i) {
 		var parsed = line.split(/\s+/);
-		if        (parsed.length >= 2 && parsed[0].match(/^private$/i)) { // 非公開タグ
+		var matchData;
+		var rule;
+		if ( parsed.length >= 3 && (matchData = parsed[0].match(/^match(|_all)$/i)) ) {  // 一致
+			rule = { tag: parsed[1], regexps: parsed.slice(2).map(createRegExpPerfectMatch) };
+		} else if ( parsed.length >= 3 && (matchData = parsed[0].match(/^pattern(|all)$/i)) ) { // 正規表現
+			var regexps = createRegExpFromStrAry(parsed.slice(2), i + 1);
+			rule = { tag: parsed[1], regexps: regexps };
+		} else if ( parsed.length >= 2 && parsed[0].match(/^private$/i) ) {                     // 非公開タグ
 			privateRule.push.apply(privateRule, parsed.slice(1));
-		} else if (parsed.length >= 3 && parsed[0].match(/^match$/i))   { // 一致
-			patternRule.push({
-				tag: parsed[1],
-				regexps: parsed.slice(2).map(function(tag){
-					return new RegExp('^' + tag.replace(/[.*+?^${}()|\[\]\\]/g, '\\$&') + '$');
-				})
-			});
-		} else if (parsed.length >= 3 && parsed[0].match(/^pattern$/i)) { // 正規表現
-			patternRule.push({
-				tag: parsed[1],
-				regexps: parsed.slice(2).map(function(regexStr){
-					var regexp;
-					try { regexp = new RegExp(regexStr); }
-					catch (e) {
-						errors.push({ lineNumber: (i+1), message: ('RegularExpression Error:' + e.name + ':' + e.massage + ',Str:' + regexStr) });
-						return null;
-					}
-					return regexp;
-				}).filter(function(e){ return e; })
-			});
-		} else if (line.match(/^\s*$|^\s*#/)) {                           // 空行 or コメント行
 			return;
-		} else { errors.push({lineNumber: (i+1), message: 'CommandError:Invalid Command or Too Few Arguments'}); }
+		} else if ( line.match(/^\s*$|^\s*#/) ) {                                               // 空行 or コメント行
+			return;
+		} else {
+			errors.push({ lineNumber: (i+1), message: ('CommandError:Invalid Command or Too Few Arguments, Str:' + line) });
+			return;
+		}
+
+		Array.prototype.push.call(matchData[1].length === 0 ? patternRule : patternAllRule, rule);
 	});
-	return { privateRule: privateRule, patternRule: patternRule, errors: errors };
+	return { privateRule: privateRule, patternRule: patternRule, patternAllRule: patternAllRule, errors: errors };
 };
 
 // matchDataの配列を渡すと文中の~数字をそれで置き換える
 var replaceWithMatch = function(input, matchData) {
-	return input.split(/(~\d)/).map(function(str){
+	return input.split(/(~\d)/).map(function(str) {
 		var match = str.match(/^~(\d)/);
 		if(match) { return matchData[parseInt(match[1])] || ''; }
 		return str;
@@ -88,7 +97,7 @@ var toggleSettingsView = function() {
 			window.localStorage.pixivAutoTag_taggingRule = ruleStr;
 			alert('保存しました');
 		} else {
-			alert(rule.errors.map(function(err){ return '[Error] line: ' + err.lineNumber + ', message: ' + err.message; }).join('\n'));
+			alert(rule.errors.map(function(err) { return '[Error] line: ' + err.lineNumber + ', message: ' + err.message; }).join('\n'));
 		}
 		return false;
 	};
@@ -113,8 +122,8 @@ var autoTag = function() {
 	var rule = parseRules(ruleText);
 
 	// 作品タグとタグクラウドの取得
-	var tagCloud = Array.prototype.slice.call(document.querySelectorAll('#wrapper > div.layout-body > div > section.list-container.tag-container.tag-cloud-container > ul.list-items.tag-cloud > li')).map(function(item){ return item.textContent; });
-	var tagsExist = Array.prototype.concat.apply([], Array.prototype.slice.call(document.querySelectorAll('#wrapper > div.layout-body > div > section.list-container.tag-container.work-tags-container > div > ul > li')).map(function(item){ return item.textContent.replace(/^\*/, '').split('/'); }));
+	var tagCloud = Array.prototype.slice.call(document.querySelectorAll('#wrapper > div.layout-body > div > section.list-container.tag-container.tag-cloud-container > ul.list-items.tag-cloud > li')).map(function(item) { return item.textContent; });
+	var tagsExist = Array.prototype.concat.apply([], Array.prototype.slice.call(document.querySelectorAll('#wrapper > div.layout-body > div > section.list-container.tag-container.work-tags-container > div > ul > li')).map(function(item) { return item.textContent.replace(/^\*/, '').split('/'); }));
 
 	// 非公開タグが含まれていた場合、自動で非公開に設定
 	if (tagsExist.some(function(tag){ return rule.privateRule.indexOf(tag) !== -1; })) {
@@ -124,29 +133,38 @@ var autoTag = function() {
 	// ブックマークタグリストの生成
 	var input = document.querySelector('#input_tag');
 	if (input.value.length === 0) {
-		// なぜ遅いのにタグクラウドの方をイテレーションしているかというと、タグをつけた回数が多い順に並ぶようにするため
-		var tagsFound = tagsExist.filter(function(existTag){ return tagCloud.some(function(cloudTag){ return existTag === cloudTag; }); });
+		// 作品タグとタグクラウドの共通タグを抽出
+		var tagsFound = tagsExist.filter(function(existTag) { return tagCloud.some(function(cloudTag){ return existTag === cloudTag; }); });
 
 		// 付与タグリストの生成
 		var tagsAdded = [];
-		tagsExist.forEach(function(foundTag){
-			rule.patternRule.forEach(function(patternRule){
+		tagsExist.forEach(function(tag) { // それぞれの作品タグが
+			rule.patternRule.forEach(function(patternRule) { // それぞれのルール文に対し
 				var matchData = [];
-				var foundMatchFlag = patternRule.regexps.some(function(pattern){
-					matchData = foundTag.match(pattern);
-					return matchData;
+				var foundMatchFlag = patternRule.regexps.some(function(pattern) { // いずれかのパターンに一致するか
+					return (matchData = tag.match(pattern));
 				});
-				if (foundMatchFlag) {
-					tagsAdded.push(replaceWithMatch(patternRule.tag, matchData));
-				}
+				if (foundMatchFlag) { tagsAdded.push(replaceWithMatch(patternRule.tag, matchData)); }
 			});
 		});
 
-		// タグを消去する
-		var tagsFound = tagsFound.filter(function(foundTag){ return tagsAdded.indexOf('-'+foundTag) === -1; });
-		var tagsAdded = tagsAdded.filter(function(tag){ return !tag.match(/^-/); });
+		rule.patternAllRule.forEach(function(patternRule) { // それぞれのルール文の
+			var matchData = [];
+			var foundMatchFlag = patternRule.regexps.every(function(pattern) { // すべてのパターンが
+				return tagsExist.some(function(tag) { return (matchData = tag.match(pattern)); }); // いずれかの作品タグに一致するか？
+			});
+			if (foundMatchFlag) { tagsAdded.push(replaceWithMatch(patternRule.tag, matchData)); }
+		});
 
-		input.value = tagsFound.concat(tagsAdded).filter(function(elem, i, ary) { return ary.indexOf(elem) === i; }).join(' ');
+		// タグを消去する
+		tagsFound = tagsFound.filter(function(foundTag) { return tagsAdded.indexOf('-'+foundTag) === -1; });
+		tagsAdded = tagsAdded.filter(function(tag) { return !tag.match(/^-/); });
+
+		// 重複の削除
+		var uniqueAry = tagsFound.concat(tagsAdded).filter(function(elem, i, ary) { return ary.indexOf(elem) === i; }).join(' ');
+
+		// ブックマークタグを設定する
+		input.value = uniqueAry;
 
 		// タグのハイライトを表示させる
 		var keyupEvent = document.createEvent('HTMLEvents');
@@ -157,7 +175,7 @@ var autoTag = function() {
 
 window.setTimeout(autoTag, 750);
 
-(function(){
+(function() {
 	// 設定ボタンの生成
 	var settingsButton = document.createElement('button');
 	settingsButton.className = '_button';
