@@ -37,7 +37,7 @@ var parseRules = function(ruleStr) {
 		var rule;
 		if ( parsed.length >= 3 && (matchData = parsed[0].match(/^match(|_all)$/i)) ) {  // 一致
 			rule = { tag: parsed[1], regexps: parsed.slice(2).map(createRegExpPerfectMatch) };
-		} else if ( parsed.length >= 3 && (matchData = parsed[0].match(/^pattern(|all)$/i)) ) { // 正規表現
+		} else if ( parsed.length >= 3 && (matchData = parsed[0].match(/^pattern(|_all)$/i)) ) { // 正規表現
 			var regexps = createRegExpFromStrAry(parsed.slice(2), i + 1);
 			rule = { tag: parsed[1], regexps: regexps };
 		} else if ( parsed.length >= 2 && parsed[0].match(/^private$/i) ) {                     // 非公開タグ
