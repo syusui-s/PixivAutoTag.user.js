@@ -11,39 +11,38 @@ var defaultRuleStr = 'private R-18';
 
 // 設定テキストを解析し、連想配列で返す
 var parseRules = function(ruleStr) {
-	var result = {};
-	result.patternRule   = [];
-	result.privateRule = [];
-	result.errors      = [];
+	var patternRule   = [];
+	var privateRule = [];
+	var errors      = [];
 
 	ruleStr.split('\n').forEach(function(line, i){
 		var parsed = line.split(/\s+/);
 		if        (parsed.length >= 2 && parsed[0].match(/^private$/i)) { // 非公開タグ
-			result.privateRule.push.apply(result.privateRule, parsed.slice(1));
+			privateRule.push.apply(privateRule, parsed.slice(1));
 		} else if (parsed.length >= 3 && parsed[0].match(/^match$/i))   { // 一致
-			result.patternRule.push({
+			patternRule.push({
 				tag: parsed[1],
 				regexps: parsed.slice(2).map(function(tag){
 					return new RegExp('^' + tag.replace(/[.*+?^${}()|\[\]\\]/g, '\\$&') + '$');
 				})
 			});
 		} else if (parsed.length >= 3 && parsed[0].match(/^pattern$/i))   { // 正規表現
-			result.patternRule.push({
+			patternRule.push({
 				tag: parsed[1],
 				regexps: parsed.slice(2).map(function(regexStr){
 					var regexp;
 					try { regexp = new RegExp(regexStr); }
 					catch (e) {
-						result.errors.push({ lineNumber: (i+1), message: ('RegularExpression Error:' + e.name + ':' + e.massage + ',Str:' + regexStr) });
+						errors.push({ lineNumber: (i+1), message: ('RegularExpression Error:' + e.name + ':' + e.massage + ',Str:' + regexStr) });
 						return null;
 					}
 					return regexp;
 				}).filter(function(e){ return e; })
 			});
 		}
-		else { result.errors.push({lineNumber: (i+1), message: 'CommandError:Invalid Command or Too Few Arguments'}); }
+		else { errors.push({lineNumber: (i+1), message: 'CommandError:Invalid Command or Too Few Arguments'}); }
 	});
-	return result;
+	return { privateRule: privateRule, patternRule: patternRule, errors: errors };
 };
 
 // matchDataの配列を渡すと文中の~数字をそれで置き換える
