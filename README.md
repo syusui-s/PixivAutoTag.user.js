@@ -80,29 +80,50 @@ Pixivでブックマークタグ付け自動化してくれるUserScriptを書�
 参考にしていただければ幸いです。
 
 ``` plain
-# プライベート設定
-private R-18
+# 非公開設定
+private R-18 R-18G R-17.9 R-15
 
-# 艦これ
-match       艦隊これくしょん 艦これ
-match       -艦これ          艦これ
-pattern     ~1               ^(.+)\(艦隊これくしょん\)$
-pattern_all ~1               ^(.+)(改|改二)$ ^艦これ$|^艦隊これくしょん$
+# 一般
+pattern オリジナル   オリジナル
+
+# 艦これ系
+pattern     艦隊これくしょん 艦これ
+pattern     ~1               ^(.+)(\(艦隊これくしょん\)|\(艦これ\))$
+pattern_all ~1               ^艦これ$|^艦隊これくしょん$ ^(.+)(改|改二)$
 match       響               ヴェールヌイ
 
 # 東方系
-match     魂魄妖夢                妖夢
-match     多々良小傘              小傘
-match     綿月依姫                依姫
-match     ミスティア・ローレライ  みすちー ミスティア
-match     パチュリー・ノーレッジ  パチュリー リュネット・パッチェ
-match     眼鏡                    リュネット・パッチェ
-match     鈴仙・優曇華院・イナバ  うどんげ 鈴仙 優曇華院
-match_all アリス・マーガトロイド  アリス 東方
+match     魂魄妖夢                   妖夢
+match     多々良小傘                 小傘
+match     綿月依姫                   依姫
+match     四季映姫・ヤマザナドゥ     四季映姫
+match     西行寺幽々子               幽々子
+match     古明地こいし               こいし
+match     古明地さとり               さとり
+match     博麗霊夢                   霊夢
+match     霧雨魔理沙                 魔理沙
+match     十六夜咲夜                 咲夜
+match     洩矢諏訪子                 諏訪子
+match     火焔猫燐                   お燐
+match     霊烏路空                   お空
+match     蓬莱山輝夜                 輝夜 ぐーや
+match     レミリア・スカーレット     レミリア
+match     フランドール・スカーレット フラン フランドール
+match     ミスティア・ローレライ     みすちー ミスティア
+match     パチュリー・ノーレッジ     パチュリー リュネット・パッチェ ぱちゅりー
+match     眼鏡                       リュネット・パッチェ
+match     鈴仙・優曇華院・イナバ     うどんげ 鈴仙 優曇華院
+match_all アリス・マーガトロイド     アリス 東方
 
 # アイドルマスター
 match -アイドルマスター アイドルマスターシンデレラガールズ
 ```
+
+要望・バグ報告・お問い合わせ
+-----
+要望やバグ報告は、[GitHubのIssueページ](https://github.com/syusui-s/PixivAutoTag.user.js/issues)までよろしくお願いします。
+
+お問い合わせは、Twitter [@syusui\_s](https://twitter.com/syusui_s/)か、<mailto:syusui.s[a]gmail.com>まで。
 
 ライセンス
 -----
