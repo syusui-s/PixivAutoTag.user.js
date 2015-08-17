@@ -123,8 +123,10 @@ var autoTag = function() {
 
 	// 作品タグとタグクラウドの取得
 	var tagCloud = Array.prototype.slice.call(document.querySelectorAll('#wrapper > div.layout-body > div > section.list-container.tag-container.tag-cloud-container > ul.list-items.tag-cloud > li')).map(function(item) { return item.textContent; });
-	var tagsExist = Array.prototype.concat.apply([], Array.prototype.slice.call(document.querySelectorAll('#wrapper > div.layout-body > div > section.list-container.tag-container.work-tags-container > div > ul > li')).map(function(item) { return item.textContent.replace(/^\*/, '').split('/'); }));
+	var tagsExist = Array.prototype.concat.apply([], Array.prototype.slice.call(document.querySelectorAll('#wrapper > div.layout-body > div > section.list-container.tag-container.work-tags-container > div > ul span.tag')).map(function(item) { return item.textContent.replace(/^\*/, '').split('/'); }));
 
+	console.log(tagsExist);
+	
 	// 非公開タグが含まれていた場合、自動で非公開に設定
 	if (tagsExist.some(function(tag){ return rule.privateRule.indexOf(tag) !== -1; })) {
 		document.querySelector('#wrapper > div.layout-body > section > form > div.submit-container > ul > li:nth-child(2) > label').click();
