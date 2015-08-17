@@ -128,8 +128,9 @@ var autoTag = function() {
 	console.log(tagsExist);
 	
 	// 非公開タグが含まれていた場合、自動で非公開に設定
+	var privateButton = document.querySelector('#wrapper > div.layout-body > section > form > div.submit-container > ul > li:nth-child(2) > label > input[type="radio"]');
 	if (tagsExist.some(function(tag){ return rule.privateRule.indexOf(tag) !== -1; })) {
-		document.querySelector('#wrapper > div.layout-body > section > form > div.submit-container > ul > li:nth-child(2) > label').click();
+		privateButton.checked = true;
 	}
 
 	// ブックマークタグリストの生成
