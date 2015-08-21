@@ -5,27 +5,32 @@ Pixivでブックマークタグ付け自動化してくれるUserScriptを書�
 
 インストール方法
 -----
-### Chrome系の場合
+### Chrome、ChromiumでTampermonkeyを使って導入する
+1. UserScriptを利用できるようにするため、[Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=ja)を導入する
+2. <https://raw.githubusercontent.com/syusui-s/PixivAutoTag.user.js/master/pixiv_auto_tag.user.js>を開く
+3. 「インストール」を押下する
+
+### Chrome、Chromiumで拡張機能として導入する（Windows非対応）
 1. pixiv\_auto\_tag.user.jsをダウンロードしておく
-2. 設定を開く Chromeの設定→設定(S) →拡張機能の一覧を開く
+2. Chromeの設定→設定(S)→拡張機能の一覧を開く
 3. 拡張機能の画面にファイラからpixiv\_auto\_tag.user.jsをドラッグ・アンド・ドロップする
 4. 確認画面でOKを押す
 
-### Firefoxの場合
+### Firefoxに導入する
 1. pixiv\_auto\_tag.user.jsをダウンロードしておく
-2. [GreaseMonkey](https://addons.mozilla.org/ja/firefox/addon/greasemonkey/)を導入しておく
-3. about:addonsをアドレスバーに入力して開き、ユーザスクリプトの項目を開く
+2. UserScriptを利用できるようにするため、[GreaseMonkey](https://addons.mozilla.org/ja/firefox/addon/greasemonkey/)を導入する
+3. about:addonsをアドレスバーに入力して開き、ユーザスクリプトの項目を開いておく
 4. ユーザスクリプトの画面にファイラからpixiv\_auto\_tag.user.jsをドラッグ・アンド・ドロップする
 5. 確認画面でインストールを押す
 
 使い方
 -----
 * Pixivの「ブックマークに追加/編集」の画面を開いたら、自動的にタグ付けと公開/非公開の設定がされます。
-  * 下記の"タグ付けルール"でタグの追加や削除、正規表現による検出と一致部分の抽出ができます。
-  * デフォルトで、R-18を非公開に設定するようにしています。下記の"タグ付けルール"で動作を変更できます。
-  * すでにブックマークタグが入力されていた場合は、何もしません。
+	* 下記の"タグ付けルール"でタグの追加や削除、正規表現による検出と一致部分の抽出ができます。
+	* デフォルトで、R-18を非公開に設定するようにしています。下記の"タグ付けルール"で動作を変更できます。
+	* すでにブックマークタグが入力されていた場合は、何もしません。
 * この作品のタグの横にある「タグ自動化設定」ボタンを押すと、設定画面が出てきます。
-  * 設定の内容や設定方法については、下記の"設定画面の項目"をご覧ください。
+	* 設定の内容や設定方法については、下記の"設定画面の項目"をご覧ください。
 
 仕組みと処理内容
 -----
