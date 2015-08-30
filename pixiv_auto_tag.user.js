@@ -10,6 +10,9 @@
 // デフォルトルール
 var defaultRuleStr = 'private R-18';
 
+// タグ入力欄
+var input = document.querySelector('#input_tag');
+
 // 設定テキストを解析し、連想配列で返す
 var parseRules = function(ruleStr) {
 	var patternRule    = [];
@@ -133,7 +136,6 @@ var autoTag = function() {
 	}
 
 	// ブックマークタグリストの生成
-	var input = document.querySelector('#input_tag');
 	if (input.value.length === 0) {
 		// 作品タグとタグクラウドの共通タグを抽出
 		var tagsFound = tagsExist.filter(function(existTag) { return tagCloud.some(function(cloudTag){ return existTag === cloudTag; }); });
@@ -194,8 +196,17 @@ var autoTag = function() {
 	settingsButton.style.marginLeft = '1em';
 	settingsButton.id = 'autotag-settings-button';
 	settingsButton.textContent = 'タグ自動化設定';
-	settingsButton.onclick = toggleSettingsView;
+	settingsButton.addEventListener('click', toggleSettingsView, false);
 
 	var target = document.querySelector('section.list-container.tag-container.work-tags-container > div > h1');
 	target.parentElement.insertBefore(settingsButton, target.nextSibling);
+
+	// タグ付けボタンの生成
+	var autoTagButton = document.createElement('button');
+	autoTagButton.className = '_button';
+	autoTagButton.style.marginLeft = '0.25em';
+	autoTagButton.id = 'autotag-button';
+	autoTagButton.textContent = '上書きタグ付け';
+	autoTagButton.addEventListener('click', function() { input.value = ''; autoTag(); }, false);
+	target.parentElement.insertBefore(autoTagButton, settingsButton.nextSibling);
 })();
