@@ -175,8 +175,10 @@ var autoTag = function() {
 		keyupEvent.initEvent('keyup', true, true);
 		input.dispatchEvent(keyupEvent);
 
-		// 自動補完が終わったら、背景を緑色にして補完がされたことを示す
+		// タグ付けが終わったら、背景を緑色にして補完がされたことを示す
 		input.parentNode.style.backgroundColor = '#76B6E0';
+		// それと入力欄にフォーカスする
+		input.focus();
 	}
 };
 
@@ -184,7 +186,7 @@ var autoTag = function() {
 	// 自動タグ付けの実行
 	if (window.location.href.match(/member_illust/)) {
 		var ul = document.querySelector('section.list-container.tag-container.work-tags-container > div > ul');
-		var func = function(fn) { (ul.childNodes.length > 0) ? autoTag() : window.setTimeout(fn, 750, fn); };
+		var func = function(fn) { (ul.childNodes.length > 0) ? window.setTimeout(autoTag, 750) : window.setTimeout(fn, 750, fn); };
 		window.setTimeout(func, 1250, func);
 	} else {
 		window.setTimeout(autoTag, 750);
