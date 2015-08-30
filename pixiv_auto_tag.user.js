@@ -172,6 +172,9 @@ var autoTag = function() {
 		var keyupEvent = document.createEvent('HTMLEvents');
 		keyupEvent.initEvent('keyup', true, true);
 		input.dispatchEvent(keyupEvent);
+
+		// 自動補完が終わったら、背景を緑色にして補完がされたことを示す
+		input.parentNode.style.backgroundColor = '#76B6E0';
 	}
 };
 
