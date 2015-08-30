@@ -2,8 +2,9 @@
 // @name              Pixiv自動ブックマークタグ付け
 // @description       Pixivのブックマークタグ付けを半自動化してくれる
 // @include           http://www.pixiv.net/bookmark_add.php?type=illust&illust_id=*
+// @include           http://www.pixiv.net/member_illust.php?mode=medium&illust_id=*
 // @run-at            document-end
-// @version           0.2.0
+// @version           0.2.1
 // ==/UserScript==
 
 // デフォルトルール
@@ -122,13 +123,11 @@ var autoTag = function() {
 	var rule = parseRules(ruleText);
 
 	// 作品タグとタグクラウドの取得
-	var tagCloud = Array.prototype.slice.call(document.querySelectorAll('#wrapper > div.layout-body > div > section.list-container.tag-container.tag-cloud-container > ul.list-items.tag-cloud > li')).map(function(item) { return item.textContent; });
-	var tagsExist = Array.prototype.concat.apply([], Array.prototype.slice.call(document.querySelectorAll('#wrapper > div.layout-body > div > section.list-container.tag-container.work-tags-container > div > ul span.tag')).map(function(item) { return item.textContent.replace(/^\*/, '').split('/'); }));
+	var tagCloud = Array.prototype.slice.call(document.querySelectorAll('section.list-container.tag-container.tag-cloud-container > ul.list-items.tag-cloud > li')).map(function(item) { return item.textContent; });
+	var tagsExist = Array.prototype.concat.apply([], Array.prototype.slice.call(document.querySelectorAll('section.list-container.tag-container.work-tags-container > div > ul span.tag')).map(function(item) { return item.textContent.replace(/^\*/, '').split('/'); }));
 
-	console.log(tagsExist);
-	
 	// 非公開タグが含まれていた場合、自動で非公開に設定
-	var privateButton = document.querySelector('#wrapper > div.layout-body > section > form > div.submit-container > ul > li:nth-child(2) > label > input[type="radio"]');
+	var privateButton = document.querySelector('div.submit-container > ul > li:nth-child(2) > label > input[type="radio"]');
 	if (tagsExist.some(function(tag){ return rule.privateRule.indexOf(tag) !== -1; })) {
 		privateButton.checked = true;
 	}
@@ -176,9 +175,16 @@ var autoTag = function() {
 	}
 };
 
-window.setTimeout(autoTag, 750);
-
 (function() {
+	// 自動タグ付けの実行
+	if (window.location.href.match(/member_illust/)) {
+		var ul = document.querySelector('section.list-container.tag-container.work-tags-container > div > ul');
+		var func = function(fn) { console.log("called"); (ul.childNodes.length > 0) ? autoTag() : window.setTimeout(fn, 750, fn); };
+		window.setTimeout(func, 1250, func);
+	} else {
+		window.setTimeout(autoTag, 750);
+	}
+
 	// 設定ボタンの生成
 	var settingsButton = document.createElement('button');
 	settingsButton.className = '_button';
@@ -187,6 +193,6 @@ window.setTimeout(autoTag, 750);
 	settingsButton.textContent = 'タグ自動化設定';
 	settingsButton.onclick = toggleSettingsView;
 
-	var target = document.querySelector('#wrapper > div.layout-body > div > section.list-container.tag-container.work-tags-container > div > h1');
+	var target = document.querySelector('section.list-container.tag-container.work-tags-container > div > h1');
 	target.parentElement.insertBefore(settingsButton, target.nextSibling);
 })();
