@@ -186,8 +186,8 @@ var autoTag = function() {
 	// 自動タグ付けの実行
 	if (window.location.href.match(/member_illust/)) {
 		var ul = document.querySelector('section.list-container.tag-container.work-tags-container > div > ul');
-		var func = function(fn) { (ul.childNodes.length > 0) ? window.setTimeout(autoTag, 750) : window.setTimeout(fn, 750, fn); };
-		window.setTimeout(func, 1250, func);
+		var checkTagGenerated = function(fn) { (ul.childNodes.length > 0) ? window.setTimeout(autoTag, 750) : window.setTimeout(fn, 750, fn); };
+		window.setTimeout(checkTagGenerated, 1250, checkTagGenerated);
 	} else {
 		window.setTimeout(autoTag, 750);
 	}
