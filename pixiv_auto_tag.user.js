@@ -94,7 +94,7 @@ var toggleSettingsView = function() {
 	saveButton.type = 'submit';
 	saveButton.className = '_button';
 	saveButton.value = '保存';
-	settingsView.onsubmit = function() {
+	settingsView.addEventListener('submit', function() {
 		var ruleStr = document.querySelector('#autotag-settings-tagging-rule').value;
 		var rule = parseRules(ruleStr);
 		if (rule.errors.length === 0) {
@@ -104,7 +104,7 @@ var toggleSettingsView = function() {
 			alert(rule.errors.map(function(err) { return '[Error] line: ' + err.lineNumber + ', message: ' + err.message; }).join('\n'));
 		}
 		return false;
-	};
+	});
 	buttonsParagraph.appendChild(saveButton);
 
 	var cancelButton = document.createElement('input');
