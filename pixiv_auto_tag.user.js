@@ -3,6 +3,7 @@
 // @description       Pixivのブックマークタグ付けを半自動化してくれます https://github.com/syusui-s/PixivAutoTag.user.js
 // @include           http://www.pixiv.net/bookmark_add.php?type=illust&illust_id=*
 // @include           http://www.pixiv.net/member_illust.php?mode=medium&illust_id=*
+// @include           http://www.pixiv.net/bookmark.php*
 // @run-at            document-end
 // @version           0.3.0
 // ==/UserScript==
@@ -10,8 +11,8 @@
 // デフォルトルール
 var defaultRuleStr = 'private R-18';
 
-// タグ入力欄
-var input = document.querySelector('#input_tag');
+// アップデート確認用URI
+var updateCheckURI = 'https://api.github.com/repos/syusui-s/PixivAutoTag.user.js/git/refs/heads/master';
 
 // 設定テキストを解析し、連想配列で返す
 var parseRules = function(ruleStr) {
@@ -171,6 +172,19 @@ var toggleSettingsView = function() {
 	cancelButton.value = 'キャンセル';
 	buttonsParagraph.appendChild(cancelButton);
 
+	var downloadButton = document.createElement('input');
+	downloadButton.className = '_button';
+	downloadButton.type = 'button';
+	downloadButton.value = '設定のダウンロード';
+	downloadButton.addEventListener('click', function(ev) {
+		var a = document.createElement('a');
+		var date = new Date();
+		a.href = textarea.value;
+		a.download = 'pixiv_auto_tag-' + date.getTime() + '.txt';
+		a.click();
+	});
+	buttonsParagraph.appendChild(downloadButton);
+
 	settingsView.appendChild(buttonsParagraph);
 
 	var settingsButton = document.querySelector('#autotag-settings-button');
@@ -183,11 +197,19 @@ var autoTag = function() {
 	var rule = parseRules(ruleText);
 
 	// 作品タグとタグクラウドの取得
-	var tagCloud = Array.prototype.slice.call(document.querySelectorAll('section.list-container.tag-container.tag-cloud-container > ul.list-items.tag-cloud > li')).map(function(item) { return item.textContent; });
-	var tagsExist = Array.prototype.concat.apply([], Array.prototype.slice.call(document.querySelectorAll('section.list-container.tag-container.work-tags-container > div > ul span.tag')).map(function(item) { return item.textContent.replace(/^\*/, '').split('/'); }));
+	var tagCloud = Array.prototype.slice.call(
+		document.querySelectorAll('section.tag-cloud-container > ul.tag-cloud > li'))
+			.map(function(item) { return item.textContent; }
+	);
+	var tagsExist = Array.prototype.concat.apply(
+		[],
+		Array.prototype.slice.call(
+			document.querySelectorAll('div.recommend-tag > ul span.tag')
+		).map(function(item) { return item.textContent.replace(/^\*/, '').split('/'); })
+	);
 
 	// 非公開タグが含まれていた場合、自動で非公開に設定
-	var privateButton = document.querySelector('div.submit-container > ul > li:nth-child(2) > label > input[type="radio"]');
+	var privateButton = document.querySelector('ul.privacy input[value="1"]');
 	if (tagsExist.some(function(tag){ return rule.privateRule.indexOf(tag) !== -1; })) {
 		privateButton.checked = true;
 	}
@@ -215,8 +237,11 @@ var autoTag = function() {
 		});
 	};
 
+	// タグ入力欄
+	var input = document.querySelector('#input_tag');
+
 	// ブックマークタグリストの生成
-	if (input.value.length === 0) {
+	if (input && input.value.length === 0) {
 		// 作品タグに追加
 		applySomeRule(tagsExist, rule.additionRule, tagsExist);
 		applyAllRule(tagsExist, rule.additionAllRule, tagsExist);
@@ -255,16 +280,7 @@ var autoTag = function() {
 	}
 };
 
-(function() {
-	// 自動タグ付けの実行
-	if (window.location.href.match(/member_illust/)) {
-		var ul = document.querySelector('section.list-container.tag-container.work-tags-container > div > ul');
-		var checkTagGenerated = function(fn) { (ul.childNodes.length > 0) ? window.setTimeout(autoTag, 750) : window.setTimeout(fn, 750, fn); };
-		window.setTimeout(checkTagGenerated, 1250, checkTagGenerated);
-	} else {
-		window.setTimeout(autoTag, 750);
-	}
-
+var generateButtons = function() {
 	// 設定ボタンの生成
 	var settingsButton = document.createElement('button');
 	settingsButton.className = '_button';
@@ -273,15 +289,43 @@ var autoTag = function() {
 	settingsButton.textContent = 'タグ自動化設定';
 	settingsButton.addEventListener('click', toggleSettingsView, false);
 
-	var target = document.querySelector('section.list-container.tag-container.work-tags-container > div > h1');
-	target.parentElement.insertBefore(settingsButton, target.nextSibling);
-
 	// タグ付けボタンの生成
 	var autoTagButton = document.createElement('button');
 	autoTagButton.className = '_button';
 	autoTagButton.style.marginLeft = '0.25em';
 	autoTagButton.id = 'autotag-button';
 	autoTagButton.textContent = '上書きタグ付け';
-	autoTagButton.addEventListener('click', function() { input.value = ''; autoTag(); }, false);
+	autoTagButton.addEventListener('click', function() {
+		var input = document.querySelector('#input_tag');
+		input.value = '';
+		autoTag();
+	}, false);
+
+	var target = document.querySelector('div.recommend-tag > h1');
+	target.parentElement.insertBefore(settingsButton, target.nextSibling);
 	target.parentElement.insertBefore(autoTagButton, settingsButton.nextSibling);
+};
+
+(function() {
+	// 自動タグ付けの実行
+	if (/member_illust.php/.test(location.href)) {
+		var ul = document.querySelector('section.list-container.tag-container.work-tags-container > div > ul');
+		var checkTagGenerated = function(fn) { (ul.childNodes.length > 0) ? window.setTimeout(autoTag, 750) : window.setTimeout(fn, 750, fn); };
+		window.setTimeout(checkTagGenerated, 1250, checkTagGenerated);
+		generateButtons();
+	} else if (/bookmark_add/.test(location.href)) {
+		window.setTimeout(autoTag, 750);
+		generateButtons();
+	}
 })();
+
+window.addEventListener('message', ev => {
+	switch (ev.data) {
+		case 'PixivAutoTag.autotag':
+			autoTag();
+			break;
+		case 'PixivAutoTag.generateButtons':
+			generateButtons()
+			break;
+	}
+});
