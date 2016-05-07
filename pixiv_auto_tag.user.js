@@ -7,6 +7,7 @@
 // @run-at            document-end
 // @version           0.3.0
 // ==/UserScript==
+'use strict';
 
 // デフォルトルール
 var defaultRuleStr = 'private R-18';
@@ -40,7 +41,7 @@ var parseRules = function(ruleStr) {
 
 	// タグ、正規表現リスト、追加先を受け取り、追加する
 	var addRule = function(tag, regexps, rules) {
-		rule = { tag: tag, regexps: regexps };
+		var rule = { tag: tag, regexps: regexps };
 		Array.prototype.push.call(rules, rule);
 	};
 
@@ -307,6 +308,9 @@ var generateButtons = function() {
 };
 
 (function() {
+	window.addEventListener('PixivAutoTag.autoTag', function () { autoTag(); });
+	window.addEventListener('PixivAutoTag.generateButtons', function () { generateButtons(); });
+
 	// 自動タグ付けの実行
 	if (/member_illust.php/.test(location.href)) {
 		var ul = document.querySelector('section.list-container.tag-container.work-tags-container > div > ul');
@@ -317,15 +321,5 @@ var generateButtons = function() {
 		window.setTimeout(autoTag, 750);
 		generateButtons();
 	}
-})();
 
-window.addEventListener('message', ev => {
-	switch (ev.data) {
-		case 'PixivAutoTag.autotag':
-			autoTag();
-			break;
-		case 'PixivAutoTag.generateButtons':
-			generateButtons()
-			break;
-	}
-});
+})();
