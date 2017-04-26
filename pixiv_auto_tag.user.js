@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name              PixivAutoTag.user.js
 // @description       Pixivのブックマークタグ付けを半自動化してくれます https://github.com/syusui-s/PixivAutoTag.user.js
-// @match             https://www.pixiv.net/bookmark_add.php?type=illust&illust_id=*
-// @match             https://www.pixiv.net/member_illust.php?mode=medium&illust_id=*
+// @match             https://www.pixiv.net/bookmark_add.php?*
+// @match             https://www.pixiv.net/member_illust.php?*illust_id=*
 // @match             https://www.pixiv.net/bookmark.php*
 // @run-at            document-end
-// @version           0.3.1
+// @version           0.3.2
 // ==/UserScript==
 'use strict';
 
@@ -15,8 +15,11 @@ var defaultRuleStr = 'private R-18';
 // アップデート確認用URI
 var updateCheckURI = 'https://api.github.com/repos/syusui-s/PixivAutoTag.user.js/git/refs/heads/master';
 
+// 
+var textareaUpdateFlag = false;
+
 // 設定テキストを解析し、連想配列で返す
-var parseRules = function(ruleStr) {
+function parseRules(ruleStr) {
 	var patternRule     = [];
 	var patternAllRule  = [];
 	var additionRule    = [];
@@ -25,9 +28,9 @@ var parseRules = function(ruleStr) {
 	var errors          = [];
 
 	// 正規表現を表す文字列のリストから、正規表現のリストを作成
-	var createRegExpFromStrAry = function(regexpStrAry, lineNumber) {
+	function createRegExpFromStrAry(regexpStrAry, lineNumber) {
 		var regexps = [];
-		regexpStrAry.forEach(function(regexpStr) {
+		regexpStrAry.forEach((regexpStr) => {
 			try { regexps.push(new RegExp(regexpStr)); }
 			catch (e) { errors.push({ lineNumber: lineNumber, message: ('正規表現のエラーです（' + e.name + ':' + e.message + '）。内容: ' + regexpStr) }); }
 		});
@@ -35,17 +38,17 @@ var parseRules = function(ruleStr) {
 	};
 
 	// strに完全一致する正規表現を生成
-	var createRegExpPerfectMatch = function(str) {
+	function createRegExpPerfectMatch(str) {
 		return new RegExp('^' + str.replace(/[.*+?^${}()|\[\]\\]/g, '\\$&') + '$');
 	};
 
 	// タグ、正規表現リスト、追加先を受け取り、追加する
-	var addRule = function(tag, regexps, rules) {
+	function addRule(tag, regexps, rules) {
 		var rule = { tag: tag, regexps: regexps };
-		Array.prototype.push.call(rules, rule);
+		rules.push(rule);
 	};
 
-	ruleStr.split('\n').forEach(function(line, num) {
+	ruleStr.split('\n').forEach((line, num) => {
 		var parsed = line.split(/\s+/);
 		var matchData;
 
@@ -106,19 +109,39 @@ var parseRules = function(ruleStr) {
 };
 
 // matchDataの配列を渡すと文中の~数字をそれで置き換える
-var replaceWithMatch = function(input, matchData) {
-	return input.split(/(~\d)/).map(function(str) {
+function replaceWithMatch(input, matchData) {
+	return input.split(/(~\d)/).map((str) => {
 		var match = str.match(/^~(\d)/);
 		if ( match ) { return matchData[parseInt(match[1])] || ''; }
 		return str;
 	}).join('');
 };
 
+function removeSettingsView() {
+	if (textareaUpdateFlag) {
+		if (window.confirm('設定に変更が存在します。保存しますか？')) {
+			document.querySelector('#autotag-settings-view input[type="submit"]').click();
+			textareaUpdateFlag = false;
+		} else if (! window.confirm('変更を破棄してもよろしいですか？')) {
+			return;
+		}
+	}
+
+	var textarea = document.querySelector('#autotag-settings-view');
+	textarea.remove();
+	return;
+};
+
 // 設定画面の生成・消去
-var toggleSettingsView = function() {
+function toggleSettingsView() {
 	// すでに存在していたなら消去
 	var settingsView = document.querySelector('#autotag-settings-view');
-	if (settingsView) { settingsView.remove(); return; }
+	if (settingsView) {
+		removeSettingsView();
+		return;
+	}
+
+	textareaUpdateFlag = false;
 
 	// 保存済みデータの取得
 	var ruleStr = window.localStorage.pixivAutoTag_taggingRule || defaultRuleStr;
@@ -141,6 +164,7 @@ var toggleSettingsView = function() {
 	textarea.rows = '10';
 	textarea.style.height = 'auto';
 	textarea.defaultValue = ruleStr;
+	textarea.addEventListener('input', (ev) => { textareaUpdateFlag = true; });
 	
 	paragraph.appendChild(label);
 	paragraph.appendChild(br);
@@ -154,14 +178,15 @@ var toggleSettingsView = function() {
 	saveButton.className = '_button';
 	saveButton.value = '保存';
 
-	settingsView.addEventListener('submit', function(ev) {
+	settingsView.addEventListener('submit', (ev) => {
 		var ruleStr = document.querySelector('#autotag-settings-tagging-rule').value;
 		var rule = parseRules(ruleStr);
 		if (rule.errors.length === 0) {
 			window.localStorage.pixivAutoTag_taggingRule = ruleStr;
 			alert('保存しました');
+			textareaUpdateFlag = false;
 		} else {
-			alert(rule.errors.map(function(err) { return '[Error] line: ' + err.lineNumber + ', message: ' + err.message; }).join('\n'));
+			alert(rule.errors.map((err) => { return '[Error] line: ' + err.lineNumber + ', message: ' + err.message; }).join('\n'));
 		}
 		ev.preventDefault();
 	});
@@ -177,7 +202,7 @@ var toggleSettingsView = function() {
 	downloadButton.className = '_button';
 	downloadButton.type = 'button';
 	downloadButton.value = '設定のダウンロード';
-	downloadButton.addEventListener('click', function(ev) {
+	downloadButton.addEventListener('click', (ev) => {
 		var a = document.createElement('a');
 		var date = new Date();
 		a.href = textarea.value;
@@ -193,34 +218,41 @@ var toggleSettingsView = function() {
 };
 
 // タグの自動追加関数
-var autoTag = function() {
+function autoTag() {
 	var ruleText = window.localStorage.pixivAutoTag_taggingRule || defaultRuleStr;
 	var rule = parseRules(ruleText);
 
 	// 作品タグとタグクラウドの取得
-	var tagCloud = Array.prototype.slice.call(
-		document.querySelectorAll('section.tag-cloud-container > ul.tag-cloud > li'))
-			.map(function(item) { return item.textContent; }
-	);
-	var tagsExist = Array.prototype.concat.apply(
-		[],
-		Array.prototype.slice.call(
+	var tagCloud = Array.from(
+			document.querySelectorAll('section.tag-cloud-container > ul.tag-cloud > li')
+		).map((item) => item.textContent);
+
+	var tagsExist = Array.from(
 			document.querySelectorAll('div.recommend-tag > ul span.tag')
-		).map(function(item) { return item.textContent.replace(/^\*/, '').split('/'); })
-	);
+		).reduce((tags, item) => {
+			var tagText = item.textContent.replace(/^\*/, '');
+
+			tags.push( tagText );
+
+			if (tagText.includes('/')) {
+				tags.push(...tagText.split('/'));
+			}
+
+			return tags;
+		}, []);
 
 	// 非公開タグが含まれていた場合、自動で非公開に設定
 	var privateButton = document.querySelector('ul.privacy input[value="1"]');
-	if (tagsExist.some(function(tag){ return rule.privateRule.indexOf(tag) !== -1; })) {
+	if (tagsExist.some((tag) =>{ return rule.privateRule.indexOf(tag) !== -1; })) {
 		privateButton.checked = true;
 	}
 
 	// tags: タグ配列, rules: ルール配列, tags: 出力先タグ配列
-	var applySomeRule = function(tags, rules, array) {
-		tags.forEach(function(tag) { // それぞれのタグに対して
-			rules.forEach(function(rule) { // それぞれのルールの
+	function applySomeRule(tags, rules, array) {
+		tags.forEach((tag) => { // それぞれのタグに対して
+			rules.forEach((rule) => { // それぞれのルールの
 				var matchData = [];
-				var foundMatchFlag = rule.regexps.some(function(pattern) { // いずれかの正規表現が一致するか？
+				var foundMatchFlag = rule.regexps.some((pattern) => { // いずれかの正規表現が一致するか？
 					return (matchData = tag.match(pattern));
 				});
 				if (foundMatchFlag) { array.push(replaceWithMatch(rule.tag, matchData)); }
@@ -228,11 +260,11 @@ var autoTag = function() {
 		});
 	};
 
-	var applyAllRule = function(tags, rules, array) {
-		rules.forEach(function(rule) { // それぞれのルール文の
+	function applyAllRule(tags, rules, array) {
+		rules.forEach((rule) => { // それぞれのルール文の
 			var matchData = [];
-			var foundMatchFlag = rule.regexps.every(function(pattern) { // すべてのパターンが
-				return tags.some(function(tag) { return (matchData = tag.match(pattern)); }); // いずれかの作品タグに一致するか？
+			var foundMatchFlag = rule.regexps.every((pattern) => { // すべてのパターンが
+				return tags.some((tag) => { return (matchData = tag.match(pattern)); }); // いずれかの作品タグに一致するか？
 			});
 			if (foundMatchFlag) { array.push(replaceWithMatch(rule.tag, matchData)); }
 		});
@@ -248,8 +280,8 @@ var autoTag = function() {
 		applyAllRule(tagsExist, rule.additionAllRule, tagsExist);
 
 		// 作品タグとタグクラウドの共通タグを抽出
-		var tagsFound = tagsExist.filter(function(existTag) {
-			return tagCloud.some(function(cloudTag){
+		var tagsFound = tagsExist.filter((existTag) => {
+			return tagCloud.some((cloudTag) =>{
 				return existTag === cloudTag;
 			});
 		});
@@ -260,11 +292,11 @@ var autoTag = function() {
 		applyAllRule(tagsExist, rule.patternAllRule, tagsAdded);
 
 		// タグを消去する
-		tagsFound = tagsFound.filter(function(foundTag) { return tagsAdded.indexOf('-'+foundTag) === -1; });
-		tagsAdded = tagsAdded.filter(function(tag) { return !tag.match(/^-/); });
+		tagsFound = tagsFound.filter((foundTag) => { return tagsAdded.indexOf('-'+foundTag) === -1; });
+		tagsAdded = tagsAdded.filter((tag) => { return !tag.match(/^-/); });
 
 		// 重複の削除
-		var uniqueAry = tagsFound.concat(tagsAdded).filter(function(elem, i, ary) { return ary.indexOf(elem) === i; }).join(' ');
+		var uniqueAry = tagsFound.concat(tagsAdded).filter((elem, i, ary) => { return ary.indexOf(elem) === i; }).join(' ');
 
 		// ブックマークタグを設定する
 		input.value = uniqueAry;
@@ -281,7 +313,7 @@ var autoTag = function() {
 	}
 };
 
-var generateButtons = function() {
+function generateButtons() {
 	// 設定ボタンの生成
 	var settingsButton = document.createElement('button');
 	settingsButton.className = '_button';
@@ -296,7 +328,7 @@ var generateButtons = function() {
 	autoTagButton.style.marginLeft = '0.25em';
 	autoTagButton.id = 'autotag-button';
 	autoTagButton.textContent = '上書きタグ付け';
-	autoTagButton.addEventListener('click', function() {
+	autoTagButton.addEventListener('click', () => {
 		var input = document.querySelector('#input_tag');
 		input.value = '';
 		autoTag();
@@ -307,14 +339,22 @@ var generateButtons = function() {
 	target.parentElement.insertBefore(autoTagButton, settingsButton.nextSibling);
 };
 
-(function() {
-	window.addEventListener('PixivAutoTag.autoTag', function () { autoTag(); });
-	window.addEventListener('PixivAutoTag.generateButtons', function () { generateButtons(); });
+(() => {
+	window.addEventListener('PixivAutoTag.autoTag', () => autoTag() );
+	window.addEventListener('PixivAutoTag.generateButtons', () => generateButtons() );
+
+	window.addEventListener('beforeunload', (e) => {
+		if (textareaUpdateFlag) {
+			var confirmationMessage = "PixivAutoTag.user.js の設定が変更されています。破棄してもよろしいですか？";
+			e.returnValue = confirmationMessage;
+			return confirmationMessage;
+		}
+	});
 
 	// 自動タグ付けの実行
 	if (/member_illust.php/.test(location.href)) {
 		var ul = document.querySelector('section.list-container.tag-container.work-tags-container > div > ul');
-		var checkTagGenerated = function(fn) { (ul.childNodes.length > 0) ? window.setTimeout(autoTag, 750) : window.setTimeout(fn, 750, fn); };
+		function checkTagGenerated(fn) { (ul.childNodes.length > 0) ? window.setTimeout(autoTag, 750) : window.setTimeout(fn, 750, fn); };
 		window.setTimeout(checkTagGenerated, 1250, checkTagGenerated);
 		generateButtons();
 	} else if (/bookmark_add/.test(location.href)) {
