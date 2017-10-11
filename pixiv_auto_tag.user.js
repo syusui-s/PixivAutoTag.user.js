@@ -3,9 +3,11 @@
 // @description       Pixivのブックマークタグ付けを半自動化してくれます https://github.com/syusui-s/PixivAutoTag.user.js
 // @match             https://www.pixiv.net/bookmark_add.php?*
 // @match             https://www.pixiv.net/member_illust.php?*illust_id=*
+// @match             https://www.pixiv.net/novel/show.php?id=*
+// @match             https://www.pixiv.net/novel/bookmark_add.php?id=*
 // @match             https://www.pixiv.net/bookmark.php*
 // @run-at            document-end
-// @version           0.3.2
+// @version           0.3.3
 // ==/UserScript==
 'use strict';
 
