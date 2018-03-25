@@ -1,5 +1,6 @@
 {
   "presets": [
-    "power-assert"
+    "power-assert",
+    "babel-preset-env"
   ]
 }
