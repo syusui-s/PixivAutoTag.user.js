@@ -59,8 +59,8 @@ export class Bookmark {
    */
   copy(obj) {
     const merged = {};
-    Object.assign(newObj, this);
-    Object.assign(newObj, obj || {});
+    Object.assign(merged, this);
+    Object.assign(merged, obj || {});
 
     const { comment, tags, scope } = merged;
     return new this.constructor(comment, tags, scope);
@@ -149,7 +149,7 @@ export class Tags {
  */
 export class Pattern {
   static string(str) {
-    const regex = new RegExp('^' + str.replace(/[.*+?^${}()|\[\]\\]/g, '\\$&') + '$');
+    const regex = new RegExp(`^${str.replace(/[.*+?^${}()|[]\\]/g, '\\$&')}$`);
     return new this(regex);
   }
 
@@ -170,7 +170,12 @@ export class Pattern {
  * ルールの集合
  */
 export class Rules {
+  constructor(iter) {
+    this.array = Array.from(iter);
+  }
+
   add(rule) {
+    return new this.constructor(this.array.concat([rule]));
   }
 }
 
@@ -183,10 +188,10 @@ class RuleBase {
   }
 
   // workTags -> bookmark -> bookmark
-  process(workTags, bookmark) { throw Error("NotImplemented"); }
+  process(workTags, bookmark) { throw Error('NotImplemented'); }
 
   // Tags -> Tags
-  matches(tags) { throw Error("NotImplemented"); }
+  matches(tags) { throw Error('NotImplemented'); }
 }
 
 const RuleAppendTag = Base => class extends Base {

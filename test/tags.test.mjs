@@ -1,5 +1,5 @@
-import { Tag, Tags } from "../src/main.mjs";
-import assert from "assert";
+import { Tag, Tags } from '../src/main.mjs';
+import assert from 'assert';
 
 const tagsArrayA = [
   '艦隊これくしょん',
@@ -36,9 +36,9 @@ const tagsCommon = new Tags(tagsArrayCommon);
 const tagsUnion  = new Tags(tagsArrayUnion);
 const tagsZ      = new Tags([]);
 
-describe("Tags", () => {
-  describe("#toArray", () => {
-    it("should return array of Tag", () => {
+describe('Tags', () => {
+  describe('#toArray', () => {
+    it('should return array of Tag', () => {
       assert( tagsA.toArray().every((tag, index) => tagsArrayA[index].equals(tag)) );
       assert.equal( tagsA.toArray().length, 4 );
 
@@ -46,62 +46,62 @@ describe("Tags", () => {
     });
   });
 
-  describe("#has", () => {
-    describe("when it contains a given tag", () => {
-      it("should return true", () => {
+  describe('#has', () => {
+    describe('when it contains a given tag', () => {
+      it('should return true', () => {
         assert( tagsArrayA.every(tag => tagsA.has(tag)) );
         assert( tagsArrayB.every(tag => tagsB.has(tag)) );
       });
     });
 
-    describe("when it does not contain a given tag", () => {
-      it("should return false", () => {
-        assert( ! tagsA.has(Tag.for("睦月")) );
-        assert( ! tagsB.has(Tag.for("如月")) );
-        assert( ! tagsZ.has(Tag.for("弥生")) );
+    describe('when it does not contain a given tag', () => {
+      it('should return false', () => {
+        assert( ! tagsA.has(Tag.for('睦月')) );
+        assert( ! tagsB.has(Tag.for('如月')) );
+        assert( ! tagsZ.has(Tag.for('弥生')) );
       });
     });
 
   });
 
-  describe("#equals", () => {
-    describe("when argument has same contents", () => {
-      it("should return true", () => {
+  describe('#equals', () => {
+    describe('when argument has same contents', () => {
+      it('should return true', () => {
         assert( tagsA.equals(tagsAA) );
       });
     });
 
-    describe("when argument does not have same contents", () => {
-      it("should return false", () => {
+    describe('when argument does not have same contents', () => {
+      it('should return false', () => {
         assert( ! tagsA.equals(tagsB) );
       });
     });
   });
 
-  describe("#union", () => {
-    it("should return intersect", () => {
-      assert( tagsA.intersect(tagsB).equals(tagsCommon) );
+  describe('#union', () => {
+    it('should return union', () => {
+      assert( tagsA.union(tagsB).equals(tagsUnion) );
     });
   });
 
-  describe("#diff", () => {
-    it("should return difference", () => {
+  describe('#diff', () => {
+    it('should return difference', () => {
       assert( tagsA.diff(tagsB).equals(tagsDiff) );
       assert( tagsA.diff(tagsZ).equals(tagsA) );
     });
   });
 
-  describe("#intersect", () => {
-    it("should return intersect", () => {
+  describe('#intersect', () => {
+    it('should return intersect', () => {
       assert( tagsA.intersect(tagsB).equals(tagsCommon) );
       assert( tagsA.intersect(tagsZ).equals(tagsZ) );
     });
   });
 
-  describe("#matchAll", () => {
+  describe('#matchAll', () => {
   });
 
-  describe("#matchSome", () => {
+  describe('#matchSome', () => {
   });
 
 });
