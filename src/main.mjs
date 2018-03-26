@@ -96,8 +96,17 @@ export class Tags {
     this.map = new Map( tags.map(tag => [ tag.text, tag ]) );
   }
 
+  /**
+   * 引数のタグを持っている時にtrueを返す
+   */
   has(tag) {
-    return tag instanceof Tag && this.map.has(tag.text);
+    return tag instanceof Tag &&
+      this.map.has(tag.text);
+  }
+
+  equals(other) {
+    return other.map.size === this.map.size &&
+      other.toArray().every(tag => this.has(tag));
   }
 
   /**
@@ -202,30 +211,3 @@ const RuleSome = Base => class extends Base {
   matches(tags) { return tags.matchSome(this.pattern); }
 };
 
-function test_tags() {
-  const tagsArrayA = [
-    '艦隊これくしょん',
-    '艦これ',
-    '卯月',
-    '卯月(艦隊これくしょん)',
-  ].map(Tag.for);
-
-  const tagsArrayB = [
-    '艦隊これくしょん',
-    '卯月',
-  ].map(Tag.for);
-
-  const tagsA = new Tags(tagsArrayA);
-  const tagsB = new Tags(tagsArrayB);
-
-  function test_tags_toArray() {
-    tagsA.toArray().every((tag, index) => tagsArrayA[index].equals(tag));
-    tagsB.toArray().every((tag, index) => tagsArrayB[index].equals(tag));
-  }
-  function test_tags_diff() {}
-  function test_tags_has() {}
-  function test_tags_intersect() {}
-  function test_tags_matchAll() {}
-  function test_tags_matchSome() {}
-  function test_tags_union() {}
-}

@@ -318,15 +318,16 @@ match 百合 ここにジャパリタワーを建てよう
 注意事項
 -----
 ローカルストレージにタグ付けルールを保存しているため、閲覧履歴の削除機能等を使用するとルールが消失してしまいます。
-閲覧履歴を消したい場合は、事前に「設定のダウンロード」を使ってバックアップを取ると良いでしょう。
+誤ってローカルストレージを消してしまった場合に備えて、
+閲覧履歴を消す前に「設定のダウンロード」を使ってバックアップを取ると良いでしょう。
 データの紛失には対応しかねますので、ご注意ください。
 
 要望・バグ報告・お問い合わせ
 -----
-要望やバグ報告は、[GitHubのIssueページ](https://github.com/syusui-s/PixivAutoTag.user.js/issues)までよろしくお願いします。
+要望やバグ報告は、[GitHubのIssueページ](https://github.com/syusui-s/PixivAutoTag.user.js/issues)までお願いいたします。
 
-お問い合わせは、Twitter [@syusui\_s](https://twitter.com/syusui_s/)か、<mailto:syusui.s[a]gmail.com>まで。
+質問などのお問い合わせは、Twitter [@syusui\_s](https://twitter.com/syusui_s/)か、<mailto:syusui.s[a]gmail.com>まで。
 
 ライセンス
 -----
-MIT LICENSEで公開します。LICENSEファイルをご覧ください。
+Expat (俗に言うMIT LICENSE) で公開します。LICENSEファイルをご覧ください。

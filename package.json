@@ -2,30 +2,27 @@
   "name": "pixiv-auto-tag",
   "version": "2.0.0",
   "description": "Pixivでブックマークタグ付け自動化してくれるUserScriptを書いたぞ！！",
-  "main": "main.mjs",
+  "main": "src/main.mjs",
   "scripts": {
-    "dev": "webpack --mode development --watch",
-    "build": "webpack --mode production",
-    "test": "mocha --require babel-core/register test/**/*.mjs",
-    "test-dev": "mocha --require babel-core/register --watch test/**/*.mjs"
+    "dev": "rollup --config --watch",
+    "build": "rollup --config",
+    "build-test": "rollup --config rollup.test.config.js",
+    "test": "npm run build && npm run build-test && mocha build/test/**/*.js",
+    "test-dev": "mocha --watch build/test/**/*.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/syusui-s/PixivAutoTag.user.js.git"
   },
   "author": "Shusui MOYATANI",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/syusui-s/PixivAutoTag.user.js/issues"
   },
   "homepage": "https://github.com/syusui-s/PixivAutoTag.user.js#readme",
   "devDependencies": {
-    "babel-loader": "^7.1.4",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-power-assert": "^2.0.0",
     "mocha": "^5.0.5",
-    "power-assert": "^1.4.4",
-    "webpack": "^4.2.0",
-    "webpack-cli": "^2.0.13"
+    "rollup": "^0.57.1",
+    "rollup-plugin-multi-entry": "^2.0.2"
   }
 }
