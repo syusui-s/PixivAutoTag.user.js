@@ -182,6 +182,8 @@ export class Rules {
 /**
  * ルールのベースとなるクラス
  */
+
+/*
 class RuleBase {
   constructor(pattern) {
     Object.assign(this, { pattern });
@@ -216,3 +218,4 @@ const RuleSome = Base => class extends Base {
   matches(tags) { return tags.matchSome(this.pattern); }
 };
 
+*/
