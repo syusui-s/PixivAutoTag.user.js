@@ -34,6 +34,7 @@ const tagsB      = new Tags(tagsArrayB);
 const tagsDiff   = new Tags(tagsArrayDiff);
 const tagsCommon = new Tags(tagsArrayCommon);
 const tagsUnion  = new Tags(tagsArrayUnion);
+const tagsX      = new Tags([]);
 const tagsZ      = new Tags([]);
 
 describe('Tags', () => {
@@ -98,10 +99,21 @@ describe('Tags', () => {
     });
   });
 
-  describe('#matchAll', () => {
+  describe('#append', () => {
+    it('should return a new Tags which has a given tag', () => {
+      const tag = Tag.for('あ');
+      assert( ! tagsA.has(tag) );
+      assert( tagsA.append(tag).has(tag) );
+    });
   });
 
-  describe('#matchSome', () => {
+  describe('#$append', () => {
+    it('should append a given tag to itself', () => {
+      const tag = Tag.for('あ');
+      assert( ! tagsX.has(tag) );
+      tagsX.$append(tag);
+      assert( tagsX.has(tag) );
+    });
   });
 
 });
