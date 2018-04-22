@@ -1,4 +1,4 @@
-import { Tag, Tags } from '../src/main.mjs';
+import { Tag, Tags } from '../src/domain.mjs';
 import assert from 'assert';
 
 const tagsArrayA = [
@@ -29,6 +29,7 @@ const tagsArrayUnion =
   tagsArrayA.concat(tagsArrayB);
 
 const tagsA      = new Tags(tagsArrayA);
+const tagA       = tagsA.toArray()[0];
 const tagsAA     = new Tags(tagsArrayA);
 const tagsB      = new Tags(tagsArrayB);
 const tagsDiff   = new Tags(tagsArrayDiff);
@@ -113,6 +114,13 @@ describe('Tags', () => {
       assert( ! tagsX.has(tag) );
       tagsX.$append(tag);
       assert( tagsX.has(tag) );
+    });
+  });
+
+  describe('#remove', () => {
+    it('should return a new Tags which does not have a given tag', () => {
+      assert( tagsA.has(tagA) );
+      assert( ! tagsA.remove(tagA).has(tagA) );
     });
   });
 

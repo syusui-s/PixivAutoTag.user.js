@@ -9,7 +9,7 @@
     "build-test": "rollup --config rollup.test.config.js",
     "lint": "eslint src/**/*.mjs",
     "lint-fix": "eslint --fix src/**/*.mjs",
-    "test": "npm run build && npm run build-test && mocha build/test/**/*.js && npm run lint",
+    "test": "npm run build-test && mocha build/test/**/*.js && npm run lint",
     "test-dev": "mocha --watch build/test/**/*.js"
   },
   "repository": {
