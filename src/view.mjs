@@ -21,7 +21,7 @@ function html(callSites, ...substitutions) {
 /**
  * ボタンを描画する
  */
-export function buttons() {
+export function buttons(actions) {
   const settingsId = 'autotagSettingsToggle';
   const autotagId  = 'autotagExec';
 
@@ -30,19 +30,27 @@ export function buttons() {
   <button class="_button" id="${autotagId}" style="margin-left: 0.25em;">上書きタグ付け</button>
   `;
 
+  h.getElementById(settingsId).addEventListener('click', () =>
+    actions.onSettingsToggle()
+  );
+
+  h.getElementById(autotagId).addEventListener('click', () =>
+    actions.onExecuteAutotag()
+  );
+
   return h;
 }
 
 /**
  * 設定画面を描画する
  */
-export function settings({ ruleRaw }) {
-  const viewId = 'autotagSettings';
+export function settings(actions, { ruleRaw }) {
+  const formId = 'autotagSettings';
   const ruleId = 'autotagSettings__Rule';
   const saveId = 'autotagSettings__Save';
 
   const h = html`
-    <form id="${viewId}" style="background: #fff; margin-top: 5px; padding: 10px 9px; border-radius: 5px">
+    <form id="${formId}" style="background: #fff; margin-top: 5px; padding: 10px 9px; border-radius: 5px">
     <p>
       <label>タグ付けルール</label>
       <br>
@@ -56,7 +64,19 @@ export function settings({ ruleRaw }) {
     </form>
   `;
 
-  h.querySelector(`#${ruleId}`).defaultValue = ruleRaw;
+  h.getElementById(ruleId).defaultValue = ruleRaw;
+
+  h.getElementById(formId).addEventListener('submit', event => {
+    event.preventDefault();
+    const ruleRaw = h.getElementById(ruleId).value;
+    actions.onSaveConfig({ ruleRaw });
+  });
+
+  h.getElementById(formId).addEventListener('click', event => {
+    event.preventDefault();
+    const ruleRaw = h.getElementById(ruleId).value;
+    actions.onDownloadConfig({ ruleRaw });
+  });
 
   return h;
 }
