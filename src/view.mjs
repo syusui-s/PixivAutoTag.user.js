@@ -31,11 +31,11 @@ export function buttons(actions) {
   `;
 
   h.getElementById(settingsId).addEventListener('click', () =>
-    actions.onSettingsToggle()
+    actions.configToggle()
   );
 
   h.getElementById(autotagId).addEventListener('click', () =>
-    actions.onExecuteAutotag()
+    actions.executeAutotag()
   );
 
   return h;
@@ -45,9 +45,9 @@ export function buttons(actions) {
  * 設定画面を描画する
  */
 export function settings(actions, { ruleRaw }) {
-  const formId = 'autotagSettings';
-  const ruleId = 'autotagSettings__Rule';
-  const saveId = 'autotagSettings__Save';
+  const formId = 'autotagSettingsForm';
+  const ruleId = 'autotagSettingsForm__Rule';
+  const saveId = 'autotagSettingsForm__Save';
 
   const h = html`
     <form id="${formId}" style="background: #fff; margin-top: 5px; padding: 10px 9px; border-radius: 5px">
@@ -64,18 +64,22 @@ export function settings(actions, { ruleRaw }) {
     </form>
   `;
 
-  h.getElementById(ruleId).defaultValue = ruleRaw;
+  const rule = h.getElementById(ruleId);
+
+  rule.defaultValue = ruleRaw;
+
+  rule.addEventListener('change', () => {
+    actions.configChange();
+  });
 
   h.getElementById(formId).addEventListener('submit', event => {
     event.preventDefault();
-    const ruleRaw = h.getElementById(ruleId).value;
-    actions.onSaveConfig({ ruleRaw });
+    actions.configSave({ ruleRaw: rule.value });
   });
 
   h.getElementById(formId).addEventListener('click', event => {
     event.preventDefault();
-    const ruleRaw = h.getElementById(ruleId).value;
-    actions.onDownloadConfig({ ruleRaw });
+    actions.configDownload();
   });
 
   return h;

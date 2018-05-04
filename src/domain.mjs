@@ -1,4 +1,4 @@
-import { shouldBe, Enum } from './lib.mjs';
+import { shouldBe, Enum, Copyable } from './lib.mjs';
 
 /**
  * 作品
@@ -34,7 +34,7 @@ export const BookmarkScope = new Enum([ 'Public', 'Private' ]);
 /**
  * ブックマーク
  */
-export class Bookmark {
+export class Bookmark extends Copyable {
   static fromObject({ comment, tags, scope }) {
     return new this(comment, tags, scope);
   }
@@ -53,25 +53,8 @@ export class Bookmark {
    * @param {symbol} scope   公開／非公開
    */
   constructor(comment, tags, scope) {
+    super();
     Object.assign(this, { comment, tags, scope });
-  }
-
-
-  /**
-   * オブジェクトをコピーする
-   *
-   * 引数にオブジェクトが渡されたら、
-   * そのオブジェクトの持つプロパティでコンストラクタへの引数が上書きされる。
-   *
-   * Scalaのcase classに生えるcopyメソッドを参考にしている。
-   */
-  copy(obj) {
-    const merged = {};
-    Object.assign(merged, this);
-    Object.assign(merged, obj || {});
-
-    const { comment, tags, scope } = merged;
-    return new this.constructor(comment, tags, scope);
   }
 
   withComment(comment) {
@@ -148,6 +131,10 @@ export class Tags {
     return new this(args);
   }
 
+  static fromIterable(tags) {
+    return new this(Array.from(tags));
+  }
+
   /**
    * 空のタグ集合を返す
    */
@@ -159,6 +146,8 @@ export class Tags {
    * @param {Tag[]} tags
    */
   constructor(tags) {
+    tags.every(tag => shouldBe(tag, Tag));
+
     this.map = new Map( tags.map(tag => [ tag.text, tag ]) );
   }
 
@@ -580,7 +569,7 @@ export class RuleConfigParser {
         const tag = Tag.for(tagName.substr(isRemove ? 1 : 0));
         const patterns = patternStrs && patternStrs.map(tag => Pattern.exact(tag));
 
-        // HACK
+        // TODO 激ヤバコードなのでいつか直す
         const AppendSome = 0, AppendAll = 1, RemoveSome = 2, RemoveAll = 3;
         let ruleFactory;
         switch (+isRemove << 1 + !!all) {
@@ -637,6 +626,7 @@ export class RuleConfigParser {
  * 設定
  */
 export class Config {
+
   static fromJson(json) {
     const obj = JSON.parse(json);
     return obj && this.fromObject(obj);
@@ -650,6 +640,10 @@ export class Config {
     new this(
       'private R-18'
     );
+  }
+
+  static create(ruleRaw) {
+    return new this(ruleRaw);
   }
 
   /**
