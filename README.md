@@ -1,4 +1,8 @@
 # PixivAutoTag.user.js
+
+[![Build Status](https://travis-ci.org/syusui-s/PixivAutoTag.user.js.svg?branch=master)](https://travis-ci.org/syusui-s/PixivAutoTag.user.js)
+[![VanillaJS](http://vanilla-js.com/assets/button.png)](http://vanilla-js.com/)
+
 Pixivでブックマークタグ付け自動化してくれるUserScriptを書いたぞ！！
 
 かなり細かくタグ付けルールを設定できるのでブックマークが捗ります。
