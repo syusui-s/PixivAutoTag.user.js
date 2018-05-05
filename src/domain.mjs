@@ -611,14 +611,17 @@ export class RuleConfigParser {
       }
     });
 
-    return {
-      privateRule,
-      patternRule,
-      patternAllRule,
-      additionRule,
-      additionAllRule,
-      errors,
-    };
+    if (errors.length !== 0) {
+      return errors;
+    }
+
+    return new Rules(
+      privateRule
+        .concat(patternRule)
+        .concat(patternAllRule)
+        .concat(additionRule)
+        .concat(additionAllRule)
+    );
   }
 }
 
@@ -665,9 +668,6 @@ export class Config {
     JSON.stringify(this);
   }
 
-  /**
-   *
-   */
   async export() {
     // TODO DOMAINの外に移す
     const a = document.createElement('a');

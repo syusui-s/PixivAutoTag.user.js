@@ -22,15 +22,15 @@ function html(callSites, ...substitutions) {
  * ボタンを描画する
  */
 export function buttons(actions) {
-  const settingsId = 'autotagSettingsToggle';
+  const configId = 'autotagConfigToggle';
   const autotagId  = 'autotagExec';
 
   const h = html`
-  <button class="_button" id="${settingsId}" style="margin-left: 1em;">タグ自動化設定</button>
+  <button class="_button" id="${configId}" style="margin-left: 1em;">タグ自動化設定</button>
   <button class="_button" id="${autotagId}" style="margin-left: 0.25em;">上書きタグ付け</button>
   `;
 
-  h.getElementById(settingsId).addEventListener('click', () =>
+  h.getElementById(configId).addEventListener('click', () =>
     actions.configToggle()
   );
 
@@ -44,10 +44,10 @@ export function buttons(actions) {
 /**
  * 設定画面を描画する
  */
-export function settings(actions, { ruleRaw }) {
-  const formId = 'autotagSettingsForm';
-  const ruleId = 'autotagSettingsForm__Rule';
-  const saveId = 'autotagSettingsForm__Save';
+export function config(actions, { ruleRaw }) {
+  const formId = 'autotagConfigForm';
+  const ruleId = 'autotagConfigForm__Rule';
+  const saveId = 'autotagConfigForm__Save';
 
   const h = html`
     <form id="${formId}" style="background: #fff; margin-top: 5px; padding: 10px 9px; border-radius: 5px">
@@ -84,3 +84,21 @@ export function settings(actions, { ruleRaw }) {
 
   return h;
 }
+
+export function discardChange(actions) {
+  const message = '設定が変更されています。破棄してもよろしいですか？';
+  const result = window.confirm(message);
+
+  if (result) {
+    actions.configDiscardChange();
+  } else {
+    actions.configContinueEditing();
+  }
+}
+
+const view = {
+  buttons,
+  config,
+};
+
+export default view;

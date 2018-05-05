@@ -1,4 +1,4 @@
-import { ConfigStore } from './dao.mjs';
+import { ConfigStore } from './repository.mjs';
 import { Bookmark, BookmarkScope, Work, Tag, Tags, Config, } from './domain.mjs';
 import { Enum } from './lib.mjs';
 import view from './view.mjs';
@@ -22,13 +22,13 @@ import view from './view.mjs';
    */
   class ActionCreator {
     /**
-     * 関数型風に言うと、present -> data -> newState というのを実現したい
-     * presentを部分適用してdata -> newStateにして、それをviewに渡したい。
+     * 関数型風に言うと、dispatch -> data -> newState というのを実現したい
+     * dispatchを部分適用してdata -> newStateにして、それをviewに渡したい。
      *
-     * @param {function} present 提案値を受け取るコールバック関数。paxos風に言うと、learnerに当たるはず。
+     * @param {function} dispatcher 提案値を受け取るコールバック関数。paxos風に言うと、learnerに当たるはず。
      */
-    constructor(present) {
-      this.present = present;
+    constructor(dispatcher) {
+      this.dispatcher = dispatcher;
     }
 
     executeAutotag(data) {
@@ -45,11 +45,9 @@ import view from './view.mjs';
         data.work.tags,
       );
 
-      this.present({
+      this.dispatcher({
         type: ActionType.EXECUTE,
-        payload: {
-          bookmark
-        }
+        payload: { bookmark, work, }
       });
     }
 
@@ -71,6 +69,9 @@ import view from './view.mjs';
 
   }
 
+  /**
+   * 設定に関する状態遷移
+   */
   class ConfigState {
     constructor(overrides) {
       Object.assign(this, overrides);
@@ -107,14 +108,24 @@ import view from './view.mjs';
     }),
 
   });
-  
+
+  class AutotagService {
+    constructor({ configRepository }) {
+      Object.assign(this, { configRepository });
+    }
+
+    execute(work, tagCloud, bookmark) {
+      const rule = this.configRepository.load().rule;
+
+      const commonTags = work.tags.intersect(tagCloud);
+    }
+  }
+
   /**
-   * モデルというか実際ストア
-   *
    * アプリケーションの状態と状態の変化を管理する
    * ここでは、自身を破壊的に変更しても良いものとする
    */
-  class Model {
+  class Store {
     /**
      * アプリケーションの初期状態
      */
@@ -149,6 +160,7 @@ import view from './view.mjs';
       case ActionType.EXECUTE:
         {
           const { work, bookmark } = action.payload;
+
         }
         break;
 
@@ -165,6 +177,7 @@ import view from './view.mjs';
         {
           const { ruleRaw } = action.payload;
           const config = Config.create(ruleRaw);
+
           this.configRepository.save(config);
         }
         break;
@@ -174,14 +187,14 @@ import view from './view.mjs';
         break;
 
       case ActionType.CONFIG_DOWNLOAD:
-        {
-          window.console.log('Unimplemented CONFIG_DOWNLOAD');
-        }
+        window.console.log(`実装されていません: ${action.type}`);
         break;
 
       default:
         throw new Error(`予期されていないか、網羅されていないアクション種別です: ${action.type}`);
       }
+
+      return this;
     }
 
   }
@@ -207,9 +220,21 @@ import view from './view.mjs';
 
   }
 
-  const model   = Model.initialState(new ConfigStore());
+  const dispatcher = {
+    on(handler) {
+      this.handler = handler;
+    },
+
+    dispatch(event) {
+      this.handler(event);
+    }
+  };
+
+  const store   = Store.initialState(state => dispatcher.dispatch(state), new ConfigStore());
   const actions = new ActionCreator(action => model.update(action));
   const state   = new State(view, actions);
+
+  dispatcher.on(() => state.render(store));
 
   state.render(model);
 

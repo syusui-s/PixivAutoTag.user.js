@@ -5,7 +5,7 @@
   "main": "src/main.mjs",
   "scripts": {
     "dev": "rollup --config --watch",
-    "build": "rollup --config",
+    "build": "rollup --config && node --experimental-modules generate_userjs.mjs",
     "build-test": "rollup --config rollup.test.config.js",
     "lint": "eslint src/**/*.mjs",
     "lint-fix": "eslint --fix src/**/*.mjs",
