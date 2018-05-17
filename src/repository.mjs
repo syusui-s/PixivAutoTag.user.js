@@ -3,7 +3,7 @@ import { Config } from './domain.mjs';
 /**
  * 設定の保存
  */
-export class ConfigStore {
+export class ConfigRepository {
 
   /** 設定の保存に用いるキー */
   static get ConfigKey() { return 'PixivAutoTagConfig'; }

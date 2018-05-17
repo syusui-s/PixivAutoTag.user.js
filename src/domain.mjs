@@ -340,9 +340,6 @@ export class Match {
   }
 }
 
-export class RuleSet {
-}
-
 /**
  * ルールの集合
  */

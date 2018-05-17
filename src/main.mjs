@@ -1,4 +1,4 @@
-import { ConfigStore } from './repository.mjs';
+import { ConfigRepository } from './repository.mjs';
 import { Bookmark, BookmarkScope, Work, Tag, Tags, Config, } from './domain.mjs';
 import { Enum } from './lib.mjs';
 import view from './view.mjs';
@@ -9,10 +9,44 @@ import view from './view.mjs';
     'EXECUTE',
     'CONFIG_TOGGLE',
     'CONFIG_SAVE',
+    'CONFIG_RESET',
     'CONFIG_CHANGED',
     'CONFIG_DISCARD_CHANGE',
+    'CONFIG_KEEP_CHANGE',
     'CONFIG_DOWNLOAD',
   );
+
+  class ActionCreator {
+    /**
+     * 関数型風に言うと、dispatch -> data -> newState というのを実現したい
+     * dispatchを部分適用してdata -> newStateにして、それをviewに渡したい。
+     *
+     * @param {function} dispatcher 提案値を受け取るコールバック関数。paxos風に言うと、learnerに当たるはず。
+     */
+    constructor(dispatcher, configRepository) {
+      this.dispatcher = dispatcher;
+      this.configRepository = configRepository;
+    }
+
+    executeAutotag(workObj, tagCloudObj, bookmarkObj) {
+      const work = new Work(
+        workObj.title,
+        workObj.description,
+        workObj.tags,
+      );
+
+      const bookmark = Bookmark.fromObject({
+        comment: bookmarkObj.comment,
+        tags:    Tags.fromIterable(bookmarkObj.tags.map(e => Tag.for(e))),
+        scope:   BookmarkScope[bookmarkObj.scope] || BookmarkScope.Public,
+      });
+
+      this.dispatcher({
+        type: ActionType.EXECUTE,
+        payload: { bookmark, work, }
+      });
+    }
+  };
 
   /**
    * モデルに値を提案する関数群を定義する
@@ -21,35 +55,6 @@ import view from './view.mjs';
    * 拒否して新しい状態を生成しないことを選択する。
    */
   class ActionCreator {
-    /**
-     * 関数型風に言うと、dispatch -> data -> newState というのを実現したい
-     * dispatchを部分適用してdata -> newStateにして、それをviewに渡したい。
-     *
-     * @param {function} dispatcher 提案値を受け取るコールバック関数。paxos風に言うと、learnerに当たるはず。
-     */
-    constructor(dispatcher) {
-      this.dispatcher = dispatcher;
-    }
-
-    executeAutotag(data) {
-
-      const bookmark = Bookmark.fromObject({
-        comment: data.bookmark.comment,
-        tags: Tags.fromIterable(data.bookmark.tags.map(e => Tag.for(e))),
-        scope: BookmarkScope[data.bookmark.scope] || BookmarkScope.Public,
-      });
-
-      const work = new Work(
-        data.work.title,
-        data.work.description,
-        data.work.tags,
-      );
-
-      this.dispatcher({
-        type: ActionType.EXECUTE,
-        payload: { bookmark, work, }
-      });
-    }
 
     configToggle() {
       this.present({ type: ActionType.CONFIG_TOGGLE });
@@ -109,16 +114,79 @@ import view from './view.mjs';
 
   });
 
-  class AutotagService {
+  /**
+   * 自動タグ付けに関するStore
+   */
+  class AutotagStore {
     constructor({ configRepository }) {
       Object.assign(this, { configRepository });
     }
 
+    /**
+     * @param {Work}     work
+     * @param {Tags}     tagCloud  
+     * @param {Bookmark} bookmark
+     */
     execute(work, tagCloud, bookmark) {
-      const rule = this.configRepository.load().rule;
+      const rules = this.configRepository.load().rules;
 
       const commonTags = work.tags.intersect(tagCloud);
+
+      const bookmarkWithCommonTags =
+        bookmark.withTags(commonTags);
+
+      return rules.process(work, bookmarkWithCommonTags);
     }
+  }
+
+  /**
+   * 設定に関する情報をやります
+   */
+  class ConfigStore {
+
+    static initialState() {
+      return new this(ConfigState.Closed);
+    }
+
+    constructor(configRepository, configState) {
+      this.configState = configState;
+    }
+
+    update(action) {
+      switch (action.type) {
+      case ActionType.CONFIG_TOGGLE:
+        this.configState = this.configState.toggle();
+        break;
+
+      case ActionType.CONFIG_CHANGED:
+        this.configState = this.configState.change();
+        break;
+
+      case ActionType.CONFIG_SAVE:
+        this.configState = this.configState.save();
+        break;
+
+      case ActionType.CONFIG_RESET:
+        this.configState = this.configState.reset();
+        break;
+
+      case ActionType.CONFIG_DISCARD_CHANGE:
+        this.configState = this.configState.discard();
+        break;
+
+      case ActionType.CONFIG_KEEP_CHANGE:
+        this.configState = this.configState.keep();
+        break;
+
+      case ActionType.CONFIG_DOWNLOAD:
+        window.console.log(`実装されていません: ${action.type}`);
+        break;
+
+      }
+
+      return this;
+    }
+
   }
 
   /**
@@ -129,9 +197,8 @@ import view from './view.mjs';
     /**
      * アプリケーションの初期状態
      */
-    static initialState(configRepository) {
+    static initialState() {
       return new this(
-        configRepository,
         null,
         ConfigState.Closed,
       );
@@ -142,11 +209,10 @@ import view from './view.mjs';
      * @param {Bookmark}    bookmark
      * @param {ConfigState} configState
      */
-    constructor(configRepository, bookmark, configState) {
+    constructor(onfigRepository, bookmark, configState) {
       Object.assign(this, {
         configRepository,
         bookmark,
-        configState,
       });
     }
 
@@ -163,38 +229,8 @@ import view from './view.mjs';
 
         }
         break;
-
-      case ActionType.CONFIG_TOGGLE:
-        this.ConfigState = this.ConfigState.toggle();
-        break;
-
-      case ActionType.CONFIG_DISCARD_CHANGE:
-        this.ConfigState = this.ConfigState.discard();
-        break;
-
-      case ActionType.CONFIG_SAVE:
-        this.ConfigState = this.ConfigState.save();
-        {
-          const { ruleRaw } = action.payload;
-          const config = Config.create(ruleRaw);
-
-          this.configRepository.save(config);
-        }
-        break;
-
-      case ActionType.CONFIG_CHANGED:
-        this.ConfigState = this.ConfigState.change();
-        break;
-
-      case ActionType.CONFIG_DOWNLOAD:
-        window.console.log(`実装されていません: ${action.type}`);
-        break;
-
-      default:
-        throw new Error(`予期されていないか、網羅されていないアクション種別です: ${action.type}`);
       }
 
-      return this;
     }
 
   }
@@ -204,7 +240,7 @@ import view from './view.mjs';
    */
   class State {
     /**
-     * @param {object} view DI
+     * @param {object} view
      */
     constructor(view, actionCreators) {
       this.view = view;
