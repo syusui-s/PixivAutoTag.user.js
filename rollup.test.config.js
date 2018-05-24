@@ -1,10 +1,11 @@
-import multiEntry from "rollup-plugin-multi-entry";
+import multiEntry from 'rollup-plugin-multi-entry';
 
 export default {
-  input: "test/**/*.test.mjs",
+  input: 'test/**/*.test.mjs',
   output: {
     file: 'build/test/test.js',
     format: 'cjs',
+    sourcemap: true,
   },
   plugins: [ multiEntry() ],
 };

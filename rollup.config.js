@@ -1,3 +1,6 @@
+import resolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
+
 export default {
   input: 'src/main.mjs',
   output: {
@@ -5,4 +8,8 @@ export default {
     format: 'iife',
     name: 'pixiv_auto_tag',
   },
+  plugins: [
+    resolve(),
+    commonjs(),
+  ],
 };

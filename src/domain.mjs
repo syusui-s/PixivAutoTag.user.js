@@ -4,21 +4,19 @@ import { shouldBe, Enum, Copyable } from './lib.mjs';
  * 作品
  */
 export class Work {
-  static fromObject({ title, description, tags }) {
-    return new this(title, description, tags);
+  static fromObject({ title, tags }) {
+    return new this(title, tags);
   }
 
   /**
    * @param {string} title       タイトル
-   * @param {string} description 説明文
    * @param {Tags}   tags        作品タグ
    */
-  constructor(title, description, tags) {
+  constructor(title, tags) {
     shouldBe(title,       'string', 'title');
-    shouldBe(description, 'string', 'description');
     shouldBe(tags,        Tags,     'tags');
 
-    Object.assign(this, { title, description, tags });
+    Object.assign(this, { title, tags });
     Object.freeze(this);
   }
 }
@@ -371,9 +369,12 @@ export class Rules {
 
   /**
    * 全てのルールを適用する
+   *
+   * @param {Work} 作品情報
+   * @return {Bookmark} 処理したBookmark
    */
   process(work, bookmark) {
-    return this.array.reduce(rule => rule.process(work, bookmark), bookmark);
+    return this.rules.reduce(rule => rule.process(work, bookmark), bookmark);
   }
 }
 
@@ -533,6 +534,20 @@ export const Rule = {
 
 };
 
+class RuleConfigParseResult {
+  static error(error) {
+    return new this(null, error);
+  }
+
+  static success(success) {
+    return new this(success, null);
+  }
+
+  constructor(success, error) {
+    Object.assign(this, { success, error });
+  }
+}
+
 /**
  * ルールの設定文字列
  */
@@ -596,7 +611,7 @@ export class RuleConfigParser {
         }
       } else if ( parsed.length >= 2 && parsed[0].match(/^private$/i) ) { // 非公開タグ
         const rules = parsed.slice(1);
-        privateRule.push(...rules);
+        privateRule.push(Rule.privateSome(rules));
       } else if ( line.match(/^\s*$|^\s*#/) ) { // 空行 or コメント行
         // nothing to do
       } else {
@@ -609,16 +624,16 @@ export class RuleConfigParser {
     });
 
     if (errors.length !== 0) {
-      return errors;
+      return RuleConfigParseResult.error(errors);
     }
 
-    return new Rules(
+    return RuleConfigParseResult.success(new Rules(
       privateRule
         .concat(patternRule)
         .concat(patternAllRule)
         .concat(additionRule)
         .concat(additionAllRule)
-    );
+    ));
   }
 }
 
@@ -637,7 +652,7 @@ export class Config {
   }
 
   static default() {
-    new this(
+    return new this(
       'private R-18'
     );
   }
@@ -658,14 +673,14 @@ export class Config {
    */
   get rule() {
     const parser = new RuleConfigParser();
-    return new parser.parse(this.ruleRaw);
+    return parser.parse(this.ruleRaw).success;
   }
 
   toJson() {
-    JSON.stringify(this);
+    return JSON.stringify(this);
   }
 
-  async export() {
+  export() {
     // TODO DOMAINの外に移す
     const a = document.createElement('a');
     const date = new Date();
@@ -676,5 +691,29 @@ export class Config {
     a.href = url.toString();
     a.download = `pixiv_auto_tag-${date.getTime()}.txt`;
     a.click();
+  }
+}
+
+export class AutoTagService {
+  constructor(configRepository) {
+    Object.assign(this, { configRepository });
+  }
+
+  /**
+   * @param {Work}     work
+   * @param {Tags}     tagCloud  
+   * @param {Bookmark} bookmark
+   */
+  execute(tagCloud, work) {
+    const config = this.configRepository.load() || Config.default();
+
+    console.log(config)
+
+    const rule = config.rule;
+    const commonTags = work.tags.intersect(tagCloud);
+
+    const bookmark = Bookmark.empty().withTags(commonTags);
+
+    return rule.process(work, bookmark);
   }
 }

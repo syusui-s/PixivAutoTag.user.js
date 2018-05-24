@@ -11,7 +11,6 @@ describe('Rule', () => {
 
   const work = Work.fromObject({
     title: '作品名',
-    description: '説明',
     tags: Tags.fromArgs(tag),
   });
 

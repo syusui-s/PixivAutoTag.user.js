@@ -1,78 +1,14 @@
 import { ConfigRepository } from './repository.mjs';
-import { Bookmark, BookmarkScope, Work, Tag, Tags, Config, } from './domain.mjs';
-import { Enum } from './lib.mjs';
-import view from './view.mjs';
+import { Tags, Tag, Work, Config, AutoTagService, BookmarkScope } from './domain.mjs';
+import views from './view.mjs';
+import { h, app } from 'hyperapp';
+import hyperx from 'hyperx';
 
 {
+  const hx = hyperx(h);
 
-  const ActionType = new Enum(
-    'EXECUTE',
-    'CONFIG_TOGGLE',
-    'CONFIG_SAVE',
-    'CONFIG_RESET',
-    'CONFIG_CHANGED',
-    'CONFIG_DISCARD_CHANGE',
-    'CONFIG_KEEP_CHANGE',
-    'CONFIG_DOWNLOAD',
-  );
-
-  class ActionCreator {
-    /**
-     * 関数型風に言うと、dispatch -> data -> newState というのを実現したい
-     * dispatchを部分適用してdata -> newStateにして、それをviewに渡したい。
-     *
-     * @param {function} dispatcher 提案値を受け取るコールバック関数。paxos風に言うと、learnerに当たるはず。
-     */
-    constructor(dispatcher, configRepository) {
-      this.dispatcher = dispatcher;
-      this.configRepository = configRepository;
-    }
-
-    executeAutotag(workObj, tagCloudObj, bookmarkObj) {
-      const work = new Work(
-        workObj.title,
-        workObj.description,
-        workObj.tags,
-      );
-
-      const bookmark = Bookmark.fromObject({
-        comment: bookmarkObj.comment,
-        tags:    Tags.fromIterable(bookmarkObj.tags.map(e => Tag.for(e))),
-        scope:   BookmarkScope[bookmarkObj.scope] || BookmarkScope.Public,
-      });
-
-      this.dispatcher({
-        type: ActionType.EXECUTE,
-        payload: { bookmark, work, }
-      });
-    }
-  };
-
-  /**
-   * モデルに値を提案する関数群を定義する
-   *
-   * モデルをこの値を受理して新しい状態を生成するか、
-   * 拒否して新しい状態を生成しないことを選択する。
-   */
-  class ActionCreator {
-
-    configToggle() {
-      this.present({ type: ActionType.CONFIG_TOGGLE });
-    }
-
-    configSave({ ruleRaw }) {
-      this.present({ type: ActionType.CONFIG_SAVE, payload: { ruleRaw } });
-    }
-
-    configUpdate() {
-      this.present({ type: ActionType.CONFIG_UPDATE });
-    }
-
-    configDownload() {
-      this.present({ type: ActionType.CONFIG_DOWNLOAD });
-    }
-
-  }
+  const configRepository = new ConfigRepository();
+  const autoTagService   = new AutoTagService(configRepository);
 
   /**
    * 設定に関する状態遷移
@@ -114,164 +50,135 @@ import view from './view.mjs';
 
   });
 
-  /**
-   * 自動タグ付けに関するStore
-   */
-  class AutotagStore {
-    constructor({ configRepository }) {
-      Object.assign(this, { configRepository });
-    }
-
-    /**
-     * @param {Work}     work
-     * @param {Tags}     tagCloud  
-     * @param {Bookmark} bookmark
-     */
-    execute(work, tagCloud, bookmark) {
-      const rules = this.configRepository.load().rules;
-
-      const commonTags = work.tags.intersect(tagCloud);
-
-      const bookmarkWithCommonTags =
-        bookmark.withTags(commonTags);
-
-      return rules.process(work, bookmarkWithCommonTags);
-    }
-  }
 
   /**
-   * 設定に関する情報をやります
+   * 自動タグ付けを実行する
    */
-  class ConfigStore {
+  function autoTag() {
+    const tagCloud = findTagCloud();
+    const work     = findWork();
 
-    static initialState() {
-      return new this(ConfigState.Closed);
+    const bookmark = autoTagService.execute(tagCloud, work);
+
+    const form = document.querySelector('form[action^="bookmark_add.php"]');
+
+    form.comment.value  = bookmark.comment;
+    form.tag.value      = bookmark.tags.toArray().join(' ');
+    form.restrict.value = bookmark.scope === BookmarkScope.Public ? 0 : 1;
+
+    return;
+    
+    function tagsFromNodes(nodeList) {
+      const tags = Array.from(nodeList).map(tagNode => Tag.for(tagNode.textContent));
+
+      return Tags.fromIterable(tags);
     }
 
-    constructor(configRepository, configState) {
-      this.configState = configState;
+    function findTagCloud() {
+      const tagListNodes = document.querySelectorAll('section.tag-cloud-container > ul.tag-cloud > li');
+
+      return tagsFromNodes(tagListNodes);
     }
 
-    update(action) {
-      switch (action.type) {
-      case ActionType.CONFIG_TOGGLE:
-        this.configState = this.configState.toggle();
-        break;
+    function findWork() {
+      const title = document.querySelector('.bookmark-detail-unit h1.title').textContent;
 
-      case ActionType.CONFIG_CHANGED:
-        this.configState = this.configState.change();
-        break;
+      const workTagNodes = Array.from(document.querySelectorAll('div.recommend-tag > ul span.tag'));
+      const tags = tagsFromNodes(workTagNodes);
 
-      case ActionType.CONFIG_SAVE:
-        this.configState = this.configState.save();
-        break;
-
-      case ActionType.CONFIG_RESET:
-        this.configState = this.configState.reset();
-        break;
-
-      case ActionType.CONFIG_DISCARD_CHANGE:
-        this.configState = this.configState.discard();
-        break;
-
-      case ActionType.CONFIG_KEEP_CHANGE:
-        this.configState = this.configState.keep();
-        break;
-
-      case ActionType.CONFIG_DOWNLOAD:
-        window.console.log(`実装されていません: ${action.type}`);
-        break;
-
-      }
-
-      return this;
+      return new Work(title, tags);
     }
 
   }
 
-  /**
-   * アプリケーションの状態と状態の変化を管理する
-   * ここでは、自身を破壊的に変更しても良いものとする
-   */
-  class Store {
-    /**
-     * アプリケーションの初期状態
-     */
-    static initialState() {
-      return new this(
-        null,
-        ConfigState.Closed,
-      );
-    }
+  function render() {
+    const state = {
+      configState: ConfigState.Closed,
+      ruleRaw: (configRepository.load() || Config.default()).ruleRaw,
+    };
 
-    /**
-     * @param {ConfigStore} configRepository
-     * @param {Bookmark}    bookmark
-     * @param {ConfigState} configState
-     */
-    constructor(onfigRepository, bookmark, configState) {
-      Object.assign(this, {
-        configRepository,
-        bookmark,
-      });
-    }
+    const actions = {
+      executeAutoTag: () => state => {
+        autoTag();
+        return state;
+      },
 
-    /**
-     * 提案された値を受け取り、
-     * 受理して新しい状態を生成するか、拒否してnullを返す
-     */
-    update(action) {
-      switch (action.type) {
+      configToggle: () => state => {
+        const newState = { ...state, configState: state.configState.toggle() };
 
-      case ActionType.EXECUTE:
-        {
-          const { work, bookmark } = action.payload;
+        if (newState.configState === ConfigState.AskClose) {
+          const message = '設定が変更されています。破棄してもよろしいですか？';
+          const result = window.confirm(message);
 
+          if (result) {
+            return actions.configDiscardChange()(newState);
+          } else {
+            return actions.configKeepChange()(newState);
+          }
         }
-        break;
-      }
 
-    }
+        return newState;
+      },
+
+      configSave: ({ ruleRaw }) => state => {
+        const config = Config.create(ruleRaw);
+        configRepository.save(config);
+
+        return { ...state, configState: state.configState.toggle() };
+      },
+
+      configUpdate: () => state => (
+        { ...state, configState: state.configState.change() }
+      ),
+
+      configDownload: () => state => state,
+    };
+
+    const view = (state, actions) => {
+      const open = state.configState !== ConfigState.Closed;
+      const h = hx`
+        <span>
+          ${views.buttons(actions, state)}
+          ${open ? views.config(actions, state) : ''}
+        </span>
+      `;
+
+      return h;
+    };
+
+    const container = document.createElement('span');
+    app(state, actions, view, container);
+
+    const prevElem = document.querySelector('.recommend-tag > h1.title');
+    prevElem.parentNode.insertBefore(container, prevElem.nextSibiling);
 
   }
 
-  /**
-   * 状態遷移に関する処理を行う
-   */
-  class State {
-    /**
-     * @param {object} view
-     */
-    constructor(view, actionCreators) {
-      this.view = view;
-      this.actionCreators = actionCreators;
-    }
-
-    bookmarkInitialized(model) {
-      return model.bookmark !== undefined;
-    }
-
-    render(model) {
-    }
-
+  function execute() {
+    render();
+    autoTag();
   }
 
-  const dispatcher = {
-    on(handler) {
-      this.handler = handler;
-    },
+  function onLoad() {
+    const isIllustPage   = url => /member_illust.php/.test(url);
+    const isBookmarkPage = url => /bookmark_add/.test(url);
 
-    dispatch(event) {
-      this.handler(event);
+    if (isIllustPage(location.href)) {
+      const tagsNode = document.querySelector('section.list-container.tag-container.work-tags-container > div > ul');
+
+      const observer = new MutationObserver(records => {
+        const isReady = records.some(record => record.type === 'childList' && record.addedNodes.length > 0);
+
+        if (isReady)
+          execute();
+      });
+
+      observer.observe(tagsNode, { childList: true });
+    } else if (isBookmarkPage(location.href)) {
+      execute();
     }
-  };
+  }
 
-  const store   = Store.initialState(state => dispatcher.dispatch(state), new ConfigStore());
-  const actions = new ActionCreator(action => model.update(action));
-  const state   = new State(view, actions);
-
-  dispatcher.on(() => state.render(store));
-
-  state.render(model);
+  onLoad();
 
 }

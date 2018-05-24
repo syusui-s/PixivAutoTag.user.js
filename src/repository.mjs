@@ -11,14 +11,14 @@ export class ConfigRepository {
   /**
    * 設定を保存する
    */
-  async save(config) {
-    return window.localStorage.setItem(this.constructor.ConfigKey, config.toJson);
+  save(config) {
+    return window.localStorage.setItem(this.constructor.ConfigKey, config.toJson());
   }
 
   /**
    * 設定を取得する
    */
-  async load() {
+  load() {
     const json = window.localStorage.getItem(this.constructor.ConfigKey);
     return Config.fromJson(json);
   }

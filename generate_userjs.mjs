@@ -44,7 +44,7 @@ class UserScriptMetadataBuilder {
       throw new Error(`runAt argument must be ${this.constructor.runAtValues} but given ${value}`);
     }
 
-    this.addLine(['@match', value]);
+    this.addLine(['@run-at', value]);
 
     return this;
   }
@@ -60,7 +60,7 @@ class UserScriptMetadataBuilder {
       this.constructor.firstLine,
       ...formattedLines,
       this.constructor.lastLine,
-    ].map(line => `// ${line}`).join('\n');
+    ].map(line => `// ${line}`).join('\n') + '\n';
   }
 }
 
@@ -76,10 +76,10 @@ const writeFile = util.promisify(fs.writeFile);
 async function main() {
   const json = await readFile('./package.json', { encoding: 'utf8' });
   const data = JSON.parse(json);
-  const { name, description, version } = data;
+  const { description, version } = data;
 
   const header = new UserScriptMetadataBuilder()
-    .name(name)
+    .name('PixivAutoTag.user.js')
     .description(description)
     .version(version)
     .match('https://www.pixiv.net/member_illust.php?*illust_id=*')
@@ -92,7 +92,7 @@ async function main() {
 
   const body = await readFile('./build/pixiv_auto_tag.js', { encoding: 'utf8' });
 
-  await writeFile('./build/pixiv_auto_tag.user.js', `${header}\n\n${body}`);
+  await writeFile('./build/pixiv_auto_tag.user.js', `${header}\n${body}`);
 }
 
 main();
