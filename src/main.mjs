@@ -124,7 +124,7 @@ import hyperx from 'hyperx';
         const config = Config.create(ruleRaw);
         configRepository.save(config);
 
-        return { ...state, configState: state.configState.toggle() };
+        return { ...state, configState: state.configState.save() };
       },
 
       configUpdate: () => state => (

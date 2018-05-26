@@ -56,11 +56,13 @@ class UserScriptMetadataBuilder {
     const formattedLines =
       this.lines.map(([type, ...rest]) => [type.padEnd(padLength), ...rest].join(' '));
 
-    return [
+    const lines = [
       this.constructor.firstLine,
       ...formattedLines,
       this.constructor.lastLine,
-    ].map(line => `// ${line}`).join('\n') + '\n';
+    ];
+
+    return `${lines.map(line => `// ${line}`).join('\n')}\n`;
   }
 }
 
@@ -71,14 +73,13 @@ Object.assign(UserScriptMetadataBuilder, {
 });
 
 const readFile  = util.promisify(fs.readFile);
-const writeFile = util.promisify(fs.writeFile);
 
-async function main() {
+export default async function generateUserJs() {
   const json = await readFile('./package.json', { encoding: 'utf8' });
   const data = JSON.parse(json);
   const { description, version } = data;
 
-  const header = new UserScriptMetadataBuilder()
+  const banner = new UserScriptMetadataBuilder()
     .name('PixivAutoTag.user.js')
     .description(description)
     .version(version)
@@ -90,9 +91,5 @@ async function main() {
     .runAt('document-end')
     .build();
 
-  const body = await readFile('./build/pixiv_auto_tag.js', { encoding: 'utf8' });
-
-  await writeFile('./build/pixiv_auto_tag.user.js', `${header}\n${body}`);
+  return banner;
 }
-
-main();
