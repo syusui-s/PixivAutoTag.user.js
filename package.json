@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/syusui-s/PixivAutoTag.user.js#readme",
   "devDependencies": {
+    "chokidar": "^2.0.4",
     "eslint": "^4.19.1",
     "mocha": "^5.2.0",
     "rollup": "^0.57.1",

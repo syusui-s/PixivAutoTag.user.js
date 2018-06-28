@@ -1,60 +1,19 @@
 import { ConfigRepository } from './repository.mjs';
-import { Tags, Tag, Work, Config, AutoTagService, BookmarkScope } from './domain.mjs';
-import views from './view.mjs';
-import { h, app } from 'hyperapp';
-import hyperx from 'hyperx';
+import { Bookmark, Tags, Tag, Work, AutoTagService, BookmarkScope } from './domain.mjs';
+import * as ui from './ui.mjs';
+import { app } from 'hyperapp';
 
 {
-  const hx = hyperx(h);
-
   const configRepository = new ConfigRepository();
   const autoTagService   = new AutoTagService(configRepository);
-
-  /**
-   * 設定に関する状態遷移
-   */
-  class ConfigState {
-    constructor(overrides) {
-      Object.assign(this, overrides);
-    }
-
-    toggle()  { return this; }
-    change()  { return this; }
-    save()    { return this; }
-    reset()   { return this; }
-    discard() { return this; }
-    keep()    { return this; }
-  }
-
-  Object.assign(ConfigState, {
-
-    Closed: new ConfigState({
-      toggle() { return ConfigState.NoChange; },
-    }),
-
-    NoChange: new ConfigState({
-      toggle() { return ConfigState.Closed;  },
-      change() { return ConfigState.Changed; },
-    }),
-
-    Changed: new ConfigState({
-      toggle() { return ConfigState.AskClose; },
-      save()   { return ConfigState.NoChange; },
-      reset()  { return ConfigState.NoChange; },
-    }),
-
-    AskClose: new ConfigState({
-      discard() { return ConfigState.NoChange; },
-      keep()    { return ConfigState.Changed;  },
-    }),
-
-  });
-
 
   /**
    * 自動タグ付けを実行する
    */
   function autoTag() {
+    if (! findBookmark().isEmpty())
+      return;
+
     const tagCloud = findTagCloud();
     const work     = findWork();
 
@@ -67,9 +26,14 @@ import hyperx from 'hyperx';
     form.restrict.value = bookmark.scope === BookmarkScope.Public ? 0 : 1;
 
     return;
-    
+
     function tagsFromNodes(nodeList) {
-      const tags = Array.from(nodeList).map(tagNode => Tag.for(tagNode.textContent));
+      const tags = Array.from(nodeList).map(tagNode => {
+        const tagRaw = tagNode.textContent;
+        const tag    = tagRaw.replace(/^\*/, '');
+
+        return Tag.for(tag);
+      });
 
       return Tags.fromIterable(tags);
     }
@@ -89,65 +53,22 @@ import hyperx from 'hyperx';
       return new Work(title, tags);
     }
 
+    function findBookmark() {
+      const form = document.querySelector('.bookmark-detail-unit > form');
+
+      return Bookmark.fromObject({
+        comment: form.comment.value,
+        tags:    Tags.fromIterable(form.tag.value.split(/\s*/).map(tagName => Tag.for(tagName))),
+        scope:   form.restrict.value === '0' ? BookmarkScope.Public : BookmarkScope.Private,
+      });
+    }
+
   }
 
+
   function render() {
-    const state = {
-      configState: ConfigState.Closed,
-      ruleRaw: (configRepository.load() || Config.default()).ruleRaw,
-    };
-
-    const actions = {
-      executeAutoTag: () => state => {
-        autoTag();
-        return state;
-      },
-
-      configToggle: () => state => {
-        const newState = { ...state, configState: state.configState.toggle() };
-
-        if (newState.configState === ConfigState.AskClose) {
-          const message = '設定が変更されています。破棄してもよろしいですか？';
-          const result = window.confirm(message);
-
-          if (result) {
-            return actions.configDiscardChange()(newState);
-          } else {
-            return actions.configKeepChange()(newState);
-          }
-        }
-
-        return newState;
-      },
-
-      configSave: ({ ruleRaw }) => state => {
-        const config = Config.create(ruleRaw);
-        configRepository.save(config);
-
-        return { ...state, configState: state.configState.save() };
-      },
-
-      configUpdate: () => state => (
-        { ...state, configState: state.configState.change() }
-      ),
-
-      configDownload: () => state => state,
-    };
-
-    const view = (state, actions) => {
-      const open = state.configState !== ConfigState.Closed;
-      const h = hx`
-        <span>
-          ${views.buttons(actions, state)}
-          ${open ? views.config(actions, state) : ''}
-        </span>
-      `;
-
-      return h;
-    };
-
     const container = document.createElement('span');
-    app(state, actions, view, container);
+    app(ui.state(configRepository), ui.actions(autoTag, configRepository), ui.view, container);
 
     const prevElem = document.querySelector('.recommend-tag > h1.title');
     prevElem.parentNode.insertBefore(container, prevElem.nextSibiling);
@@ -163,19 +84,21 @@ import hyperx from 'hyperx';
     const isIllustPage   = url => /member_illust.php/.test(url);
     const isBookmarkPage = url => /bookmark_add/.test(url);
 
+    const observer = new MutationObserver(records => {
+      const isReady = records.some(record => record.type === 'childList' && record.addedNodes.length > 0);
+
+      if (isReady)
+        execute();
+    });
+
     if (isIllustPage(location.href)) {
       const tagsNode = document.querySelector('section.list-container.tag-container.work-tags-container > div > ul');
-
-      const observer = new MutationObserver(records => {
-        const isReady = records.some(record => record.type === 'childList' && record.addedNodes.length > 0);
-
-        if (isReady)
-          execute();
-      });
-
       observer.observe(tagsNode, { childList: true });
+
     } else if (isBookmarkPage(location.href)) {
-      execute();
+      const tagCloud = document.querySelector('ul.list-items.tag-cloud.loading-indicator');
+      observer.observe(tagCloud, { childList: true });
+
     }
   }
 

@@ -74,6 +74,10 @@ export class Bookmark extends Copyable {
   toPublic() {
     return this.copy({ scope: BookmarkScope.Public });
   }
+
+  isEmpty() {
+    return this.comment.length === 0 && this.tags.isEmpty();
+  }
 }
 
 /**
@@ -252,6 +256,9 @@ export class Tags {
     return this;
   }
 
+  isEmpty() {
+    return this.map.size === 0;
+  }
 }
 
 /**
@@ -374,7 +381,7 @@ export class Rules {
    * @return {Bookmark} 処理したBookmark
    */
   process(work, bookmark) {
-    return this.rules.reduce(rule => rule.process(work, bookmark), bookmark);
+    return this.rules.reduce((bookmark, rule) => rule.process(work, bookmark), bookmark);
   }
 }
 
@@ -605,12 +612,13 @@ export class RuleConfigParser {
           rules.push(ruleFactory(tag, patterns));
           break;
         case 'addition_pattern':
-          throw new Error('not implemented');
+          // throw new Error('not implemented');
+          break;
         default:
-          throw new Error('not implemented');
+          throw new Error(`未知のルールです: ${ruleType}`);
         }
       } else if ( parsed.length >= 2 && parsed[0].match(/^private$/i) ) { // 非公開タグ
-        const rules = parsed.slice(1);
+        const rules = parsed.slice(1).map(tag => Pattern.exact(tag));
         privateRule.push(Rule.privateSome(rules));
       } else if ( line.match(/^\s*$|^\s*#/) ) { // 空行 or コメント行
         // nothing to do
@@ -707,8 +715,6 @@ export class AutoTagService {
   execute(tagCloud, work) {
     const config = this.configRepository.load() || Config.default();
 
-    console.log(config)
-
     const rule = config.rule;
     const commonTags = work.tags.intersect(tagCloud);
 
@@ -717,3 +723,4 @@ export class AutoTagService {
     return rule.process(work, bookmark);
   }
 }
+
