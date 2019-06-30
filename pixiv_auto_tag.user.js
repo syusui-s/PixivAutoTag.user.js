@@ -273,7 +273,7 @@ function autoTag() {
 	};
 
 	// タグ入力欄
-	var input = document.querySelector('#input_tag');
+	var input = document.querySelector('input[name="tag"]');
 
 	// ブックマークタグリストの生成
 	if (input && input.value.length === 0) {
@@ -331,7 +331,7 @@ function generateButtons() {
 	autoTagButton.id = 'autotag-button';
 	autoTagButton.textContent = '上書きタグ付け';
 	autoTagButton.addEventListener('click', () => {
-		var input = document.querySelector('#input_tag');
+		var input = document.querySelector('input[name="tag"]');
 		input.value = '';
 		autoTag();
 	}, false);
@@ -360,8 +360,19 @@ function generateButtons() {
 		window.setTimeout(checkTagGenerated, 1250, checkTagGenerated);
 		generateButtons();
 	} else if (/bookmark_add/.test(location.href)) {
-		window.setTimeout(autoTag, 750);
-		generateButtons();
+		window.setTimeout(function() {
+			var count = 0;
+			var interval = window.setInterval(function() {
+				var foundTag = !!document.querySelector('section.tag-cloud-container > ul.tag-cloud > li');
+
+				if (count >= 10 || foundTag) {
+					clearInterval(interval);
+					autoTag();
+				}
+			}, 250);
+			generateButtons();
+		}, 750);
 	}
 
 })();
+/* vim: set noet : */
