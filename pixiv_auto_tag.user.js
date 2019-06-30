@@ -207,7 +207,9 @@ function toggleSettingsView() {
 	downloadButton.addEventListener('click', (ev) => {
 		var a = document.createElement('a');
 		var date = new Date();
-		a.href = textarea.value;
+		var blob = new Blob([textarea.value], { type: 'text/plain' });
+		var url = URL.createObjectURL(blob);
+		a.href = url;
 		a.download = 'pixiv_auto_tag-' + date.getTime() + '.txt';
 		a.click();
 	});
