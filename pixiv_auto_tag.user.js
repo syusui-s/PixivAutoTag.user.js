@@ -300,20 +300,28 @@ function autoTag() {
 		tagsAdded = tagsAdded.filter((tag) => { return !tag.match(/^-/); });
 
 		// 重複の削除
-		var uniqueAry = tagsFound.concat(tagsAdded).filter((elem, i, ary) => { return ary.indexOf(elem) === i; }).join(' ');
+		var uniqueAry = tagsFound.concat(tagsAdded).filter((elem, i, ary) => { return ary.indexOf(elem) === i; });
+		
+		var value = uniqueAry.join(' ');
 
 		// ブックマークタグを設定する
-		input.value = uniqueAry;
+		// 
+		var valueSetter          = Object.getOwnPropertyDescriptor(input, 'value').set;
+		var proto                = Object.getPrototypeOf(input);
+		var prototypeValueSetter = Object.getOwnPropertyDescriptor(proto, 'value').set;
 
-		// タグのハイライトを表示させる
-		var keyupEvent = document.createEvent('HTMLEvents');
-		keyupEvent.initEvent('keyup', true, true);
-		input.dispatchEvent(keyupEvent);
+		if (valueSetter && valueSetter !== prototypeValueSetter) {
+			prototypeValueSetter.call(input, value);
+		} else {
+			valueSetter.call(input, value);
+		}
 
 		// タグ付けが終わったら、背景を緑色にして補完がされたことを示す
 		input.parentNode.style.backgroundColor = '#76B6E0';
 		// それと入力欄にフォーカスする
 		input.focus();
+		// Reactに対応するために、inputイベントを発火する
+		input.dispatchEvent(new Event('input', { bubbles: true }));
 	}
 };
 
