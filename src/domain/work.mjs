@@ -1,4 +1,6 @@
-import { shouldBe } from './lib.mjs';
+import { shouldBe } from '../lib.mjs';
+
+import { Tags } from './tag.mjs';
 
 /**
  * 作品

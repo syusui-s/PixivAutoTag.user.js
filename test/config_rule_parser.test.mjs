@@ -1,12 +1,12 @@
 import {
-  RuleConfigParser
-} from '../src/domain.mjs';
+  ConfigRuleParser
+} from '../src/config_rule_parser.mjs';
 
 import assert from 'assert';
 
-describe('RuleConfigParser', () => {
+describe('ConfigRuleParser', () => {
 
-  const parser = new RuleConfigParser();
+  const parser = new ConfigRuleParser();
 
   describe('#parse', () => {
 

@@ -1,4 +1,4 @@
-import { shouldBe, Enum, Copyable } from './lib.mjs';
+import { shouldBe } from '../lib.mjs';
 
 /**
  * タグに一致するパターン

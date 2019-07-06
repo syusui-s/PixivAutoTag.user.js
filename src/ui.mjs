@@ -1,4 +1,4 @@
-import { Config } from './domain.mjs';
+import { Config } from './config.mjs';
 import views from './view.mjs';
 import hyperx from 'hyperx';
 import { h } from 'hyperapp';
@@ -75,7 +75,13 @@ export const actions = (autoTag, configRepository) => ({
 
   configSave: ({ ruleRaw }) => state => {
     const config = Config.create(ruleRaw);
-    configRepository.save(config);
+
+    try {
+      configRepository.save(config);
+      alert('保存しました');
+    } catch (e) {
+      alert(`保存に失敗しました: ${e}`);
+    }
 
     return { ...state, ruleRaw, configState: state.configState.save() };
   },

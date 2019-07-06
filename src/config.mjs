@@ -1,3 +1,5 @@
+import { ConfigRuleParser } from './config_rule_parser.mjs';
+
 /**
  * 設定
  */
@@ -8,13 +10,17 @@ export class Config {
     return obj && this.fromObject(obj);
   }
 
+  static fromRuleRaw(ruleRaw) {
+    return new this(ruleRaw);
+  }
+
   static fromObject({ ruleRaw }) {
     return new this(ruleRaw);
   }
 
   static default() {
     return new this(
-      'private R-18'
+      '# 設定例: https://github.com/syusui-s/PixivAutoTag.user.js#%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB'
     );
   }
 
@@ -32,9 +38,9 @@ export class Config {
   /**
    * ルールを取得する
    */
-  get rule() {
-    const parser = new RuleConfigParser();
-    return parser.parse(this.ruleRaw).success;
+  rule() {
+    const parser = new ConfigRuleParser();
+    return parser.parse(this.ruleRaw);
   }
 
   toJson() {
@@ -42,7 +48,6 @@ export class Config {
   }
 
   export() {
-    // TODO DOMAINの外に移す
     const a = document.createElement('a');
     const date = new Date();
 

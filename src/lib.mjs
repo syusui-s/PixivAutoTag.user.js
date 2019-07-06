@@ -31,7 +31,7 @@ export class Enum {
           return target[name];
         }
 
-        throw new TypeError(`No such enum property: ${name}`);
+        throw new TypeError(`No such enum property: ${String(name)}`);
       },
     });
   }

@@ -1,6 +1,6 @@
-import { Rule, Pattern } from './domain.mjs';
+import { Rule, Rules, Pattern, Tag } from './domain.mjs';
 
-class RuleConfigParseResult {
+class ConfigRuleParseResult {
   static error(error) {
     return new this(null, error);
   }
@@ -17,7 +17,7 @@ class RuleConfigParseResult {
 /**
  * ルールの設定文字列
  */
-export class RuleConfigParser {
+export class ConfigRuleParser {
   /**
    * パースしてRulesを生成する
    *
@@ -60,7 +60,7 @@ export class RuleConfigParser {
         case RemoveAll:  ruleFactory = Rule.removeAll;
           break;
         default:
-          throw new Error('');
+          throw new Error(`実装上漏れのあるケースがあります: isRemove: ${isRemove} all: ${all}`);
         }
 
         switch (ruleType) {
@@ -71,10 +71,14 @@ export class RuleConfigParser {
           rules.push(ruleFactory(tag, patterns));
           break;
         case 'addition_pattern':
-          // throw new Error('not implemented');
+        case 'addition_pattern_all':
+          errors.push({
+            lineNumber: (num+1),
+            message: `申し訳ありませんが、addition_patternルールに対応していません。内容: ${line}`
+          });
           break;
         default:
-          throw new Error(`未知のルールです: ${ruleType}`);
+          throw new Error(`実装上漏れのあるケースがあります: ${ruleType}`);
         }
       } else if ( parsed.length >= 2 && parsed[0].match(/^private$/i) ) { // 非公開タグ
         const rules = parsed.slice(1).map(tag => Pattern.exact(tag));
@@ -91,10 +95,10 @@ export class RuleConfigParser {
     });
 
     if (errors.length !== 0) {
-      return RuleConfigParseResult.error(errors);
+      return ConfigRuleParseResult.error(errors);
     }
 
-    return RuleConfigParseResult.success(new Rules(
+    return ConfigRuleParseResult.success(new Rules(
       privateRule
         .concat(patternRule)
         .concat(patternAllRule)

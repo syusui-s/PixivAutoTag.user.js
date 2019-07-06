@@ -10,6 +10,9 @@ export default {
     name: 'pixiv_auto_tag',
     banner: generateUserJs(),
   },
+  watch: {
+    include: 'src/**/*',
+  },
   plugins: [
     resolve(),
     commonjs(),
