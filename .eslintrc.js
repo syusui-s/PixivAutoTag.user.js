@@ -3,6 +3,7 @@ module.exports = {
     "browser": true,
     "es6": true,
     "mocha": true,
+    "greasemonkey": true,
   },
   "extends": "eslint:recommended",
   "parserOptions": {
@@ -26,6 +27,7 @@ module.exports = {
       "error",
       "always"
     ],
+    "eqeqeq": ["error", "always"],
     "arrow-body-style": "error",
     "arrow-parens": ["error", "as-needed"],
     "arrow-spacing": "error",

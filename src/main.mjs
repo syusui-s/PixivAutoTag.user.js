@@ -1,11 +1,11 @@
-import { ConfigRepository } from './repository.mjs';
+import { ConfigStore } from './config_store.mjs';
 import { Bookmark, Tags, Tag, Work, AutoTagService, BookmarkScope } from './domain.mjs';
 import * as ui from './ui.mjs';
 import { app } from 'hyperapp';
 
 {
-  const configRepository = new ConfigRepository();
-  const autoTagService   = new AutoTagService(configRepository);
+  const configStore = new ConfigStore();
+  const autoTagService   = new AutoTagService(configStore);
 
   /**
    * 自動タグ付けを実行する
@@ -68,7 +68,7 @@ import { app } from 'hyperapp';
 
   function render() {
     const container = document.createElement('span');
-    app(ui.state(configRepository), ui.actions(autoTag, configRepository), ui.view, container);
+    app(ui.state(configStore), ui.actions(autoTag, configStore), ui.view, container);
 
     const prevElem = document.querySelector('.recommend-tag > h1.title');
     prevElem.parentNode.insertBefore(container, prevElem.nextSibiling);
