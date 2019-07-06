@@ -207,7 +207,9 @@ function toggleSettingsView() {
 	downloadButton.addEventListener('click', (ev) => {
 		var a = document.createElement('a');
 		var date = new Date();
-		a.href = textarea.value;
+		var blob = new Blob([textarea.value], { type: 'text/plain' });
+		var url = URL.createObjectURL(blob);
+		a.href = url;
 		a.download = 'pixiv_auto_tag-' + date.getTime() + '.txt';
 		a.click();
 	});
@@ -273,7 +275,7 @@ function autoTag() {
 	};
 
 	// タグ入力欄
-	var input = document.querySelector('#input_tag');
+	var input = document.querySelector('input[name="tag"]');
 
 	// ブックマークタグリストの生成
 	if (input && input.value.length === 0) {
@@ -298,20 +300,28 @@ function autoTag() {
 		tagsAdded = tagsAdded.filter((tag) => { return !tag.match(/^-/); });
 
 		// 重複の削除
-		var uniqueAry = tagsFound.concat(tagsAdded).filter((elem, i, ary) => { return ary.indexOf(elem) === i; }).join(' ');
+		var uniqueAry = tagsFound.concat(tagsAdded).filter((elem, i, ary) => { return ary.indexOf(elem) === i; });
+		
+		var value = uniqueAry.join(' ');
 
 		// ブックマークタグを設定する
-		input.value = uniqueAry;
+		// 
+		var valueSetter          = Object.getOwnPropertyDescriptor(input, 'value').set;
+		var proto                = Object.getPrototypeOf(input);
+		var prototypeValueSetter = Object.getOwnPropertyDescriptor(proto, 'value').set;
 
-		// タグのハイライトを表示させる
-		var keyupEvent = document.createEvent('HTMLEvents');
-		keyupEvent.initEvent('keyup', true, true);
-		input.dispatchEvent(keyupEvent);
+		if (valueSetter && valueSetter !== prototypeValueSetter) {
+			prototypeValueSetter.call(input, value);
+		} else {
+			valueSetter.call(input, value);
+		}
 
 		// タグ付けが終わったら、背景を緑色にして補完がされたことを示す
 		input.parentNode.style.backgroundColor = '#76B6E0';
 		// それと入力欄にフォーカスする
 		input.focus();
+		// Reactに対応するために、inputイベントを発火する
+		input.dispatchEvent(new Event('input', { bubbles: true }));
 	}
 };
 
@@ -331,7 +341,7 @@ function generateButtons() {
 	autoTagButton.id = 'autotag-button';
 	autoTagButton.textContent = '上書きタグ付け';
 	autoTagButton.addEventListener('click', () => {
-		var input = document.querySelector('#input_tag');
+		var input = document.querySelector('input[name="tag"]');
 		input.value = '';
 		autoTag();
 	}, false);
@@ -360,8 +370,19 @@ function generateButtons() {
 		window.setTimeout(checkTagGenerated, 1250, checkTagGenerated);
 		generateButtons();
 	} else if (/bookmark_add/.test(location.href)) {
-		window.setTimeout(autoTag, 750);
-		generateButtons();
+		window.setTimeout(function() {
+			var count = 0;
+			var interval = window.setInterval(function() {
+				var foundTag = !!document.querySelector('section.tag-cloud-container > ul.tag-cloud > li');
+
+				if (count >= 10 || foundTag) {
+					clearInterval(interval);
+					autoTag();
+				}
+			}, 250);
+			generateButtons();
+		}, 750);
 	}
 
 })();
+/* vim: set noet : */
