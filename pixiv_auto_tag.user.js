@@ -7,7 +7,9 @@
 // @match             https://www.pixiv.net/novel/bookmark_add.php?id=*
 // @match             https://www.pixiv.net/bookmark.php*
 // @run-at            document-end
-// @version           0.3.3
+// @version           0.3.4
+// @downloadURL       https://github.com/syusui-s/PixivAutoTag.user.js/raw/master/pixiv_auto_tag.user.js
+// @updateURL         https://github.com/syusui-s/PixivAutoTag.user.js/raw/master/pixiv_auto_tag.user.js
 // ==/UserScript==
 'use strict';
 
@@ -15,7 +17,7 @@
 var defaultRuleStr = 'private R-18';
 
 // アップデート確認用URI
-var updateCheckURI = 'https://api.github.com/repos/syusui-s/PixivAutoTag.user.js/git/refs/heads/master';
+varupdateCheckURI = 'https://api.github.com/repos/syusui-s/PixivAutoTag.user.js/git/refs/heads/master';
 
 // 
 var textareaUpdateFlag = false;
