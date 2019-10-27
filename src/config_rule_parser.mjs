@@ -45,7 +45,6 @@ export class ConfigRuleParser {
         const rules = all ? patternAllRule : patternRule;
         const isRemove = tagName[0] === '-';
         const tag = Tag.for(tagName.substr(isRemove ? 1 : 0));
-        const patterns = patternStrs && patternStrs.map(tag => Pattern.exact(tag));
 
         // TODO 激ヤバコードなのでいつか直す
         const AppendSome = 0, AppendAll = 1, RemoveSome = 2, RemoveAll = 3;
@@ -66,9 +65,17 @@ export class ConfigRuleParser {
         switch (ruleType) {
         case 'match':
         case 'match_all':
+          {
+            const patterns = patternStrs && patternStrs.map(tag => Pattern.exact(tag));
+            rules.push(ruleFactory(tag, patterns));
+          }
+          break;
         case 'pattern':
         case 'pattern_all':
-          rules.push(ruleFactory(tag, patterns));
+          {
+            const patterns = patternStrs && patternStrs.map(tag => Pattern.regexp(tag));
+            rules.push(ruleFactory(tag, patterns));
+          }
           break;
         case 'addition_pattern':
         case 'addition_pattern_all':

@@ -22,6 +22,7 @@ describe('ConfigRuleParser', () => {
           'pattern オリジナル オリジナル\n' +
           '# 艦これ\n' +
           'pattern_all ~1 ^艦これ$|^艦隊これくしょん$ ^(.+)(改|改二)$\n' +
+          'pattern     ~1 ^(.+)(艦隊これくしょん)$\n' +
           'match 卯月 うーちゃん\n' +
           '# 東方\n' +
           'match_all 多々良小傘 東方 小傘\n';
