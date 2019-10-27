@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import util from 'util';
 import licenseChecker from 'license-checker';
 
@@ -75,7 +76,7 @@ Object.assign(UserScriptMetadataBuilder, {
 
 const generateLicenses = async function() {
   const packages = await new Promise((resolve, reject) =>
-    licenseChecker.init({ start: __dirname, production: true }, (err, packages) => 
+    licenseChecker.init({ start: path.resolve(), production: true }, (err, packages) => 
       err ? reject(err) : resolve(packages)
     )
   );
