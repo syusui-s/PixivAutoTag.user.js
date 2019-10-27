@@ -38,7 +38,7 @@ export class ConfigRuleParser {
       const parsed = line.split(/\s+/);
 
       if (parsed.length >= 3 && parsed[0] && parsed[0].match(typeRegex)) {
-        const [ ruleName, params ] = parsed;
+        const [ ruleName, ...params ] = parsed;
         const [ tagName, ...patternStrs ] = params;
         const [ ruleType, all ] = ruleName && ruleName.match(typeRegex) || [];
 

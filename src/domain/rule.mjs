@@ -34,16 +34,18 @@ export class Pattern {
 
   /**
    * 自身のパターンに引数のタグの集合のいずれかが一致するかどうかを返す
+   *
+   * @return {Match}
    */
   matchSome(tags) {
     for (const tag of tags.toArray()) {
       const match = this.match(tag);
 
-      if (match)
+      if (match.succeeded())
         return match;
     }
 
-    return null;
+    return Match.failed();
   }
 }
 

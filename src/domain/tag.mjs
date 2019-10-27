@@ -27,14 +27,7 @@ export class Tag {
   toString() {
     return this.text;
   }
-}
 
-/**
- * ブックマークに追加されるタグ
- *
- * マッチ結果のグループへの参照を表記できる。
- */
-export class TagRef extends Tag {
   /**
    * 参照をマッチの結果で置き換える
    */

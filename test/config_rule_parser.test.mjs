@@ -4,6 +4,8 @@ import {
 
 import assert from 'assert';
 
+import util from 'util';
+
 describe('ConfigRuleParser', () => {
 
   const parser = new ConfigRuleParser();
@@ -25,9 +27,9 @@ describe('ConfigRuleParser', () => {
           'match_all 多々良小傘 東方 小傘\n';
           // 'addition_pattern_all ~1(アズールレーン) ^アズールレーン|アズレン|碧蓝航线$ ^睦月|如月|卯月|水無月)$';
 
-        console.log(parser.parse(rule));
+        console.log(util.inspect(parser.parse(rule).success.rules, false, null));
+        
         assert(true);
-
       });
     });
   });

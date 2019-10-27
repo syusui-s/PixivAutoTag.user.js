@@ -1,6 +1,6 @@
 import {
   Bookmark, Work,
-  Tag, TagRef, Tags, Pattern, Rule,
+  Tag, Tags, Pattern, Rule,
 } from '../src/domain.mjs';
 
 import assert from 'assert';
@@ -16,7 +16,7 @@ describe('Rule', () => {
 
   describe('.appendSome', () => {
     const ruleMatch = Rule.appendSome(
-      TagRef.for('追加タグ'),
+      Tag.for('追加タグ'),
       [
         Pattern.exact('マッチしない1'),
         Pattern.exact('マッチしない2'),
@@ -26,7 +26,7 @@ describe('Rule', () => {
     );
 
     const ruleNotMatch = Rule.appendSome(
-      TagRef.for('追加タグ'),
+      Tag.for('追加タグ'),
       [
         Pattern.exact('マッチしない'),
       ]
@@ -54,7 +54,7 @@ describe('Rule', () => {
   describe('.appendAll', () => { });
 
   describe('.removeSome', () => {
-    const tagRef = TagRef.for('タグ');
+    const tagRef = Tag.for('タグ');
 
     const ruleMatch = Rule.removeSome(
       tagRef,
