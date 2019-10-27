@@ -1,5 +1,6 @@
 import fs from 'fs';
 import util from 'util';
+import licenseChecker from 'license-checker';
 
 class UserScriptMetadataBuilder {
 
@@ -72,7 +73,26 @@ Object.assign(UserScriptMetadataBuilder, {
   lastLine:    '==/UserScript==',
 });
 
-const readFile  = util.promisify(fs.readFile);
+const generateLicenses = async function() {
+  const packages = await new Promise((resolve, reject) =>
+    licenseChecker.init({ start: __dirname, production: true }, (err, packages) => 
+      err ? reject(err) : resolve(packages)
+    )
+  );
+
+  const fqdn = Object.keys(packages).filter(name => name.startsWith('pixiv-auto-tag'));
+  if (fqdn.length > 0)
+    delete packages[fqdn];
+
+  const licenseTexts = Object.keys(packages).map(name =>
+    readFile(packages[name].licenseFile, { encoding: 'utf8' })
+      .then(text => ({ name, text }))
+  );
+
+  return Promise.all(licenseTexts);
+};
+
+const readFile = util.promisify(fs.readFile);
 
 export default async function generateUserJs() {
   const json = await readFile('./package.json', { encoding: 'utf8' });
@@ -91,5 +111,13 @@ export default async function generateUserJs() {
     .runAt('document-end')
     .build();
 
-  return banner;
+  const licensesTexts = await generateLicenses();
+  const licenses = licensesTexts
+    .map(({ name, text }) => `\n${name}\n${text}`)
+    .join('\n')
+    .split('\n')
+    .map(line => `// ${line}`)
+    .join('\n');
+
+  return banner + licenses;
 }

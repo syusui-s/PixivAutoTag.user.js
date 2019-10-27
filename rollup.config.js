@@ -5,10 +5,10 @@ import generateUserJs from './generate_userjs.mjs';
 export default {
   input: 'src/main.mjs',
   output: {
+    banner: generateUserJs,
     file: 'build/pixiv_auto_tag.user.js',
     format: 'iife',
     name: 'pixiv_auto_tag',
-    banner: generateUserJs(),
   },
   watch: {
     include: 'src/**/*',
