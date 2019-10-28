@@ -9,9 +9,12 @@ describe('Rule', () => {
   const tagStr = 'タグ';
   const tag    = Tag.for(tagStr);
 
+  const tagStr1 = 'タグ1';
+  const tag1    = Tag.for(tagStr1);
+
   const work = Work.fromObject({
     title: '作品名',
-    tags: Tags.fromArgs(tag),
+    tags: Tags.fromArgs(tag, tag1),
   });
 
   describe('.appendSome', () => {
@@ -51,7 +54,42 @@ describe('Rule', () => {
     });
   });
 
-  describe('.appendAll', () => { });
+  describe('.appendAll', () => {
+    const ruleMatch = Rule.appendAll(
+      Tag.for('追加タグ'),
+      [
+        Pattern.exact('タグ1'),
+        Pattern.exact('タグ'),
+      ]
+    );
+
+    const ruleNotMatch = Rule.appendAll(
+      Tag.for('追加タグ'),
+      [
+        Pattern.exact('タグ'),
+        Pattern.exact('タグ1'),
+        Pattern.exact('マッチしない'),
+      ]
+    );
+
+    describe('#process', () => {
+      describe('when rule matches a tag', () => {
+        it('should return bookmark which has a tag', () => {
+          const tag = Tag.for('追加タグ');
+          const resultBookmark = ruleMatch.process(work, Bookmark.empty());
+          assert( resultBookmark.tags.has(tag) );
+        });
+      });
+
+      describe('when rule does not match a tag', () => {
+        it('should return bookmark which does not have a tag', () => {
+          const tag = Tag.for('追加タグ');
+          const resultBookmark = ruleNotMatch.process(work, Bookmark.empty());
+          assert( ! resultBookmark.tags.has(tag) );
+        });
+      });
+    });
+  });
 
   describe('.removeSome', () => {
     const tagRef = Tag.for('タグ');

@@ -229,7 +229,9 @@ const RuleAll = Base => class extends Base {
   matches(tags) {
     const matchResults = this.patterns.map(pat => pat.matchSome(tags));
 
-    return matchResults.all(m => m.succeeded()) ?  matchResults[0] : Match.failed();
+    return matchResults.every(m => m.succeeded())
+      ? matchResults[0]
+      : Match.failed();
   }
 };
 

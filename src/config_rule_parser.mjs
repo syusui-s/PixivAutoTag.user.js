@@ -33,14 +33,14 @@ export class ConfigRuleParser {
     const errors          = [];
 
     ruleStr.split('\n').forEach((line, num) => {
-      const typeRegex = /^pattern|match|addition_pattern(_all)?$/i;
+      const typeRegex = /^(pattern|match|addition_pattern)(_all)?$/i;
 
       const parsed = line.split(/\s+/);
 
       if (parsed.length >= 3 && parsed[0] && parsed[0].match(typeRegex)) {
         const [ ruleName, ...params ] = parsed;
         const [ tagName, ...patternStrs ] = params;
-        const [ ruleType, all ] = ruleName && ruleName.match(typeRegex) || [];
+        const [ ruleType, all ] = ruleName && ruleName.match(typeRegex).slice(1) || [];
 
         const rules = all ? patternAllRule : patternRule;
         const isRemove = tagName[0] === '-';
@@ -49,7 +49,7 @@ export class ConfigRuleParser {
         // TODO 激ヤバコードなのでいつか直す
         const AppendSome = 0, AppendAll = 1, RemoveSome = 2, RemoveAll = 3;
         let ruleFactory;
-        switch (+isRemove << 1 + (+!!all)) {
+        switch ((+isRemove << 1) + !!all) {
         case AppendSome: ruleFactory = Rule.appendSome;
           break;
         case AppendAll:  ruleFactory = Rule.appendAll;
