@@ -1,15 +1,18 @@
-import { Config } from './config.mjs';
-import views from './view.mjs';
-import hyperx from 'hyperx';
+import { Config } from './config.js';
+import views from './view.js';
 import { h } from 'hyperapp';
+import hyperx from 'hyperx';
 const hx = hyperx(h);
 
 /**
  * 設定に関する状態遷移
  */
 class ConfigState {
-  constructor(overrides) {
-    Object.assign(this, overrides);
+  /**
+   * @param {object} override
+   */
+  constructor(override) {
+    Object.assign(this, override);
   }
 
   toggle()  { return this; }
@@ -20,36 +23,37 @@ class ConfigState {
   keep()    { return this; }
 }
 
-Object.assign(ConfigState, {
-
-  Closed: new ConfigState({
-    toggle() { return ConfigState.NoChange; },
-  }),
-
-  NoChange: new ConfigState({
-    toggle() { return ConfigState.Closed;  },
-    change() { return ConfigState.Changed; },
-  }),
-
-  Changed: new ConfigState({
-    toggle() { return ConfigState.AskClose; },
-    save()   { return ConfigState.NoChange; },
-    reset()  { return ConfigState.NoChange; },
-  }),
-
-  AskClose: new ConfigState({
-    discard() { return ConfigState.NoChange; },
-    keep()    { return ConfigState.Changed;  },
-  }),
-
+ConfigState.Closed = new ConfigState({
+  toggle() { return ConfigState.NoChange; },
 });
 
+ConfigState.NoChange = new ConfigState({
+  toggle() { return ConfigState.Closed;  },
+  change() { return ConfigState.Changed; },
+});
 
+ConfigState.Changed = new ConfigState({
+  toggle() { return ConfigState.AskClose; },
+  save()   { return ConfigState.NoChange; },
+  reset()  { return ConfigState.NoChange; },
+});
+
+ConfigState.AskClose = new ConfigState({
+  discard() { return ConfigState.NoChange; },
+  keep()    { return ConfigState.Changed;  },
+});
+
+/** @typedef {{ configState: ConfigState, ruleRaw: string }} AppState */
+
+/** @type {(ConfigStore) => AppState} */
 export const state = configRepository => ({
   configState: ConfigState.Closed,
   ruleRaw: (configRepository.load() || Config.default()).ruleRaw,
 });
 
+/**
+ * @type {(autoTag: () => void, configRepository: ConfigStore) => object}
+ */
 export const actions = (autoTag, configRepository) => ({
   executeAutoTag: () => state => {
     autoTag();

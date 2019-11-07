@@ -1,4 +1,4 @@
-import { Pattern, Tag, Match } from '../src/domain.mjs';
+import { Pattern, Tag, Match } from '../src/domain.js';
 
 import assert from 'assert';
 

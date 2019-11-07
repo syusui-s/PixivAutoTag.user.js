@@ -1,7 +1,7 @@
 import {
   Bookmark, Work,
   Tag, Tags, Pattern, Rule,
-} from '../src/domain.mjs';
+} from '../src/domain.js';
 
 import assert from 'assert';
 
@@ -12,7 +12,7 @@ describe('Rule', () => {
   const tagStr1 = 'タグ1';
   const tag1    = Tag.for(tagStr1);
 
-  const work = Work.fromObject({
+  const work = Work({
     title: '作品名',
     tags: Tags.fromArgs(tag, tag1),
   });

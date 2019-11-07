@@ -1,16 +1,40 @@
-import { Rule, Rules, Pattern, Tag } from './domain.mjs';
+import { Rule, Rules, Pattern, Tag } from './domain.js';
+
+/** @typedef {import('./domain/rule.js').Action} Action */
+
+class ConfigRuleParseError {
+  /**
+   * @param {number} lineNumber
+   * @param {string} message
+   */
+  constructor(lineNumber, message) {
+    this.lineNumber = lineNumber;
+    this.message = message;
+  }
+} 
 
 class ConfigRuleParseResult {
-  static error(error) {
-    return new this(null, error);
+  /**
+   * @param {ConfigRuleParseError[]} errors
+   */
+  static error(errors) {
+    return new this(null, errors);
   }
 
+  /**
+   * @param {Rules} success
+   */
   static success(success) {
     return new this(success, null);
   }
 
-  constructor(success, error) {
-    Object.assign(this, { success, error });
+  /**
+   * @param {Rules?}                  success
+   * @param {ConfigRuleParseError[]?} errors
+   */
+  constructor(success, errors) {
+    this.success = success;
+    this.errors  = errors;
   }
 }
 
@@ -21,18 +45,25 @@ export class ConfigRuleParser {
   /**
    * パースしてRulesを生成する
    *
-   * @throws {ConfigSyntaxError} 間違った構文のときに例外を投げる
-   * @return {Rules}
+   * @param  {string} ruleStr
+   * @throws ConfigSyntaxError 間違った構文のときに例外を投げる
+   * @return {ConfigRuleParseResult}
    */
   parse(ruleStr) {
+    /** @type {Action[]} */
     const patternRule     = [];
+    /** @type {Action[]} */
     const patternAllRule  = [];
+    /** @type {Action[]} */
     const additionRule    = [];
+    /** @type {Action[]} */
     const additionAllRule = [];
+    /** @type {Action[]} */
     const privateRule     = [];
+    /** @type {ConfigRuleParseError[]} */
     const errors          = [];
 
-    ruleStr.split('\n').forEach((line, num) => {
+    ruleStr.split('\n').forEach(/** @type {(line: string, num: number) => void} */ (line, num) => {
       const typeRegex = /^(pattern|match|addition_pattern)(_all)?$/i;
 
       const parsed = line.split(/\s+/);
@@ -40,7 +71,8 @@ export class ConfigRuleParser {
       if (parsed.length >= 3 && parsed[0] && parsed[0].match(typeRegex)) {
         const [ ruleName, ...params ] = parsed;
         const [ tagName, ...patternStrs ] = params;
-        const [ ruleType, all ] = ruleName && ruleName.match(typeRegex).slice(1) || [];
+        const match = ruleName && ruleName.match(typeRegex);
+        const [ ruleType, all ] = match && match.slice(1) || [];
 
         const rules = all ? patternAllRule : patternRule;
         const isRemove = tagName[0] === '-';
@@ -49,7 +81,7 @@ export class ConfigRuleParser {
         // TODO 激ヤバコードなのでいつか直す
         const AppendSome = 0, AppendAll = 1, RemoveSome = 2, RemoveAll = 3;
         let ruleFactory;
-        switch ((+isRemove << 1) + !!all) {
+        switch ((Number(isRemove) << 1) + Number(!!all)) {
         case AppendSome: ruleFactory = Rule.appendSome;
           break;
         case AppendAll:  ruleFactory = Rule.appendAll;
@@ -79,10 +111,7 @@ export class ConfigRuleParser {
           break;
         case 'addition_pattern':
         case 'addition_pattern_all':
-          errors.push({
-            lineNumber: (num+1),
-            message: `申し訳ありませんが、addition_patternルールに対応していません。内容: ${line}`
-          });
+          errors.push(new ConfigRuleParseError(num+1, `申し訳ありませんが、addition_patternルールに対応していません。内容: ${line}`));
           break;
         default:
           throw new Error(`実装上漏れのあるケースがあります: ${ruleType}`);
@@ -97,7 +126,7 @@ export class ConfigRuleParser {
           lineNumber: (num+1),
           message: `不正なコマンドを使用しているか、コマンドへの引数が少なすぎます。内容: ${line}`
         });
-        return false;
+        return;
       }
     });
 

@@ -1,29 +1,36 @@
-import { ConfigStore } from './config_store.mjs';
-import { Config } from './config.mjs';
-import { Bookmark, Tags, Tag, Work, BookmarkScope } from './domain.mjs';
-import * as ui from './ui.mjs';
+import { ConfigStore } from './config_store.js';
+import { Config } from './config.js';
+import { Bookmark, Tags, Tag, Work, BookmarkScope } from './domain.js';
+import * as ui from './ui.js';
 import { app } from 'hyperapp';
 
 export class AutoTagService {
+  /**
+   * @param {ConfigStore} configStore
+   */
   constructor(configStore) {
-    Object.assign(this, { configStore });
+    this.configStore = configStore;
   }
 
   /**
    * @param {Work}     work
    * @param {Tags}     tagCloud  
-   * @param {Bookmark} bookmark
+   * @return {Bookmark?}
    */
   execute(tagCloud, work) {
     const config = this.configStore.load() || Config.default();
 
     const ruleResult = config.rule();
-    if (ruleResult.error) {
-      alert(ruleResult.error.map(({ message, lineNumber}) => `${lineNumber}: ${message}`).join("\n"));
-      return;
+    if (ruleResult.errors) {
+      alert(ruleResult.errors.map(({ message, lineNumber}) => `${lineNumber}: ${message}`).join('\n'));
+      return null;
     }
 
     const rule = ruleResult.success;
+
+    if (! rule) {
+      return null;
+    }
 
     const commonTags = work.tags.intersect(tagCloud);
 
@@ -75,7 +82,8 @@ export class AutoTagService {
     }
 
     function findWork() {
-      const title = document.querySelector('.bookmark-detail-unit h1.title').textContent;
+      const titleNode = document.querySelector('.bookmark-detail-unit h1.title');
+      const title = titleNode && titleNode.textContent || ''; 
 
       const workTagNodes = Array.from(document.querySelectorAll('div.recommend-tag > ul span.tag'));
       const tags = tagsFromNodes(workTagNodes);
@@ -83,17 +91,23 @@ export class AutoTagService {
       return new Work(title, tags);
     }
 
+    /**
+     * @param {HTMLInputElement} input
+     * @param {string} key
+     * @param {string} value
+     */
     function setValueForReact(input, key, value) {
       const valueSetterDescriptor = Object.getOwnPropertyDescriptor(input, key);
 
       if (! valueSetterDescriptor) {
-        input[key] = value;
+        input.setAttribute(key, value);
         return;
       }
 
-      const valueSetter          = valueSetterDescriptor.set;
-      const proto                = Object.getPrototypeOf(input);
-      const prototypeValueSetter = Object.getOwnPropertyDescriptor(proto, key).set;
+      const valueSetter             = valueSetterDescriptor.set;
+      const proto                   = Object.getPrototypeOf(input);
+      const prototypeValueSetterOpt = Object.getOwnPropertyDescriptor(proto, key);
+      const prototypeValueSetter    = prototypeValueSetterOpt && prototypeValueSetterOpt.set;
 
       if (valueSetter && valueSetter !== prototypeValueSetter) {
         prototypeValueSetter.call(input, value);
@@ -111,11 +125,11 @@ export class AutoTagService {
   function findBookmark() {
     const form = bookmarkForm();
 
-    return Bookmark.fromObject({
+    return new Bookmark(
       comment: form.comment.value,
       tags:    Tags.fromIterable(form.tag.value.split(/\s*/).map(tagName => Tag.for(tagName))),
       scope:   form.restrict.value === '0' ? BookmarkScope.Public : BookmarkScope.Private,
-    });
+    );
   }
 
   function render() {

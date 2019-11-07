@@ -23,15 +23,24 @@
   },
   "homepage": "https://github.com/syusui-s/PixivAutoTag.user.js#readme",
   "devDependencies": {
-    "chokidar": "^3.2.2",
+    "@types/mocha": "^5.2.7",
+    "@typescript-eslint/eslint-plugin": "^2.6.1",
+    "@typescript-eslint/parser": "^2.6.1",
+    "chokidar": "^3.3.0",
     "eslint": "^6.6.0",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-prettier": "^3.1.0",
     "license-checker": "^25.0.1",
     "mocha": "^6.2.2",
-    "rollup": "^1.25.2",
+    "prettier": "^1.18.2",
+    "rollup": "^1.26.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-multi-entry": "^2.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "source-map-support": "^0.5.13"
+    "rollup-plugin-typescript2": "^0.24.3",
+    "source-map-support": "^0.5.16",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.7.2"
   },
   "dependencies": {
     "hyperapp": "^1.2.10",

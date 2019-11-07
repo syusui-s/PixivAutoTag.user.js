@@ -1,4 +1,4 @@
-import { Config } from './config.mjs';
+import { Config } from './config.js';
 
 /**
  * 設定の保存
@@ -12,28 +12,31 @@ export class ConfigStore {
 
   /**
    * 設定を保存する
+   *
+   * @param {Config} config
    */
   save(config) {
-    window.localStorage.setItem(this.constructor.ConfigKey, config.toJson());
+    window.localStorage.setItem(ConfigStore.ConfigKey, config.toJson());
   }
 
   /**
    * 設定を取得する
+   *
+   * @return {Config?}
    */
   load() {
-    const json = window.localStorage.getItem(this.constructor.ConfigKey);
-    const config = Config.fromJson(json);
+    const json = window.localStorage.getItem(ConfigStore.ConfigKey);
+    const config = json && Config.fromJson(json);
     if (config) {
       return config;
     }
 
-    const oldRuleRaw = window.localStorage.getItem(this.constructor.OldConfigKey);
-    const configFromOldRule = Config.fromRuleRaw(oldRuleRaw);
+    const oldRuleRaw = window.localStorage.getItem(ConfigStore.OldConfigKey);
+    const configFromOldRule = oldRuleRaw && Config.fromRuleRaw(oldRuleRaw);
     if (configFromOldRule) {
       return configFromOldRule; 
     }
 
     return null;
   }
-
 }

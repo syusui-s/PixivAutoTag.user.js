@@ -1,19 +1,27 @@
-import { ConfigRuleParser } from './config_rule_parser.mjs';
+import { ConfigRuleParser } from './config_rule_parser.js';
 
 /**
  * 設定
  */
 export class Config {
-
+  /**
+   * @param {string} json
+   */
   static fromJson(json) {
     const obj = JSON.parse(json);
     return obj && this.fromObject(obj);
   }
 
+  /**
+   * @param {string} ruleRaw
+   */
   static fromRuleRaw(ruleRaw) {
     return new this(ruleRaw);
   }
 
+  /**
+   * @param {{ ruleRaw: string }} arg
+   */
   static fromObject({ ruleRaw }) {
     return new this(ruleRaw);
   }
@@ -24,6 +32,9 @@ export class Config {
     );
   }
 
+  /**
+   * @param {string} ruleRaw
+   */
   static create(ruleRaw) {
     return new this(ruleRaw);
   }

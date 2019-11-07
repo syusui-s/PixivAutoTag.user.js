@@ -1,23 +1,25 @@
-import { shouldBe, Enum, Copyable } from '../lib.mjs';
-import { Tags } from './tag.mjs';
+import { Copyable } from '../lib.js';
+import { Tags } from './tag.js';
 
 /**
  * ブックマークの公開範囲
  *
  * Public: 公開
  * Private: 非公開
+ *
+ * @enum {number}
  */
-export const BookmarkScope = new Enum([ 'Public', 'Private' ]);
+export const BookmarkScope = {
+  Public: 0,
+  Private: 1,
+};
 
 /**
  * ブックマーク
+ *
+ * @extends Copyable<Bookmark>
  */
 export class Bookmark extends Copyable {
-  static fromObject({ comment, tags, scope }) {
-    return new this(comment, tags, scope);
-  }
-
-
   /**
    * 空のブックマークを返す
    */
@@ -26,24 +28,28 @@ export class Bookmark extends Copyable {
   }
 
   /**
-   * @param {string} comment ブックマークコメント
-   * @param {Tags}   tags    タグ
-   * @param {symbol} scope   公開／非公開
+   * @param {string}        comment ブックマークコメント
+   * @param {Tags}          tags    タグリスト
+   * @param {BookmarkScope} scope   公開／非公開
    */
   constructor(comment, tags, scope) {
     super();
-    Object.assign(this, { comment, tags, scope });
+    this.comment = comment;
+    this.tags = tags;
+    this.scope = scope;
   }
 
+  /**
+   * @param {string} comment
+   */
   withComment(comment) {
-    shouldBe(comment, 'string', 'comment');
-
     return this.copy({ comment });
   }
 
+  /**
+   * @param {Tags} tags タグリスト
+   */
   withTags(tags) {
-    shouldBe(tags, Tags, 'tags');
-
     return this.copy({ tags });
   }
 

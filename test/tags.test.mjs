@@ -1,4 +1,4 @@
-import { Tag, Tags } from '../src/domain.mjs';
+import { Tag, Tags } from '../src/domain.js';
 import assert from 'assert';
 
 const tagsArrayA = [

@@ -1,6 +1,6 @@
 import {
   ConfigRuleParser
-} from '../src/config_rule_parser.mjs';
+} from '../src/config_rule_parser.js';
 
 import assert from 'assert';
 
