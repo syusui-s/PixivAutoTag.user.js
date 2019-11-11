@@ -3,7 +3,9 @@
  * @typedef {import('./tag.js').Tags}          Tags
  * @typedef {import('./work.js').Work}         Work
  * @typedef {import('./bookmark.js').Bookmark} Bookmark
- *
+ */
+
+/**
  * @typedef {(bookmark: Bookmark) => Bookmark}        BookmarkAction
  * @typedef {(matchResult: Match) => BookmarkAction}  MatchAction
  * @typedef {(tag: Tag) => MatchAction}               TagMatchAction
@@ -158,16 +160,20 @@ export class Rules {
  * @type {TagMatchAction}
  */
 const appendAction = tag => matchResult => bookmark => {
-  bookmark.tags.$append(tag.resolveReference(matchResult));
-  return bookmark;
+  // bookmark.tags.$append(tag.resolveReference(matchResult));
+  // return bookmark;
+  const newTags = bookmark.tags.append(tag.resolveReference(matchResult));
+  return bookmark.withTags(newTags);
 };
 
 /**
  * @type {TagMatchAction}
  */
 const removeAction = tag => matchResult => bookmark => {
-  bookmark.tags.$remove(tag.resolveReference(matchResult));
-  return bookmark;
+  // bookmark.tags.$remove(tag.resolveReference(matchResult));
+  // return bookmark;
+  const newTags = bookmark.tags.remove(tag.resolveReference(matchResult));
+  return bookmark.withTags(newTags);
 };
 
 /**
@@ -279,6 +285,6 @@ export const Rule = {
    * @return {Action}
    */
   removeSome(tag, patterns) {
-    return forAllPatterns(patterns)(removeAction(tag));
+    return forSomePatterns(patterns)(removeAction(tag));
   },
 };

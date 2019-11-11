@@ -4,7 +4,7 @@ import rollupTs2 from 'rollup-plugin-typescript2';
 import generateUserJs from './generate_userjs.mjs';
 
 export default {
-  input: 'src/main.mjs',
+  input: 'src/main.js',
   output: {
     banner: generateUserJs,
     file: 'build/pixiv_auto_tag.user.js',

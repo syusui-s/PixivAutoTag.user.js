@@ -126,9 +126,9 @@ export class AutoTagService {
     const form = bookmarkForm();
 
     return new Bookmark(
-      comment: form.comment.value,
-      tags:    Tags.fromIterable(form.tag.value.split(/\s*/).map(tagName => Tag.for(tagName))),
-      scope:   form.restrict.value === '0' ? BookmarkScope.Public : BookmarkScope.Private,
+      form.comment.value,
+      Tags.fromIterable(form.tag.value.split(/\s*/).map(tagName => Tag.for(tagName))),
+      form.restrict.value === '0' ? BookmarkScope.Public : BookmarkScope.Private,
     );
   }
 

@@ -3,7 +3,6 @@ import {
 } from '../src/config_rule_parser.js';
 
 import assert from 'assert';
-
 import util from 'util';
 
 describe('ConfigRuleParser', () => {
@@ -28,7 +27,7 @@ describe('ConfigRuleParser', () => {
           'match_all 多々良小傘 東方 小傘\n';
           // 'addition_pattern_all ~1(アズールレーン) ^アズールレーン|アズレン|碧蓝航线$ ^睦月|如月|卯月|水無月)$';
 
-        console.log(util.inspect(parser.parse(rule).success.rules, false, null));
+        // console.log(util.inspect(parser.parse(rule).success.rules, false, null));
         
         assert(true);
       });

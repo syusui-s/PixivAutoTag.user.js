@@ -45,7 +45,7 @@ ConfigState.AskClose = new ConfigState({
 
 /** @typedef {{ configState: ConfigState, ruleRaw: string }} AppState */
 
-/** @type {(ConfigStore) => AppState} */
+/** @type {(configRepository: ConfigStore) => AppState} */
 export const state = configRepository => ({
   configState: ConfigState.Closed,
   ruleRaw: (configRepository.load() || Config.default()).ruleRaw,
