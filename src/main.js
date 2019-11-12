@@ -60,13 +60,14 @@ export class AutoTagService {
 
     setValueForReact(form.comment, 'value', bookmark.comment);
     setValueForReact(form.tag, 'value', bookmark.tags.toArray().join(' '));
-    setValueForReact(form.restrict, 'value', bookmark.scope === BookmarkScope.Public ? 0 : 1);
+    setValueForReact(form.restrict, 'value', bookmark.scope === BookmarkScope.Public ? '0' : '1');
 
     return;
 
+    /** @param {NodeList} nodeList */
     function tagsFromNodes(nodeList) {
       const tags = Array.from(nodeList).map(tagNode => {
-        const tagRaw = tagNode.textContent;
+        const tagRaw = tagNode.textContent || '';
         const tag    = tagRaw.replace(/^\*/, '');
 
         return Tag.for(tag);
@@ -75,6 +76,7 @@ export class AutoTagService {
       return Tags.fromIterable(tags);
     }
 
+    /** @return {Tags} */
     function findTagCloud() {
       const tagListNodes = document.querySelectorAll('section.tag-cloud-container > ul.tag-cloud > li');
 
@@ -85,7 +87,7 @@ export class AutoTagService {
       const titleNode = document.querySelector('.bookmark-detail-unit h1.title');
       const title = titleNode && titleNode.textContent || ''; 
 
-      const workTagNodes = Array.from(document.querySelectorAll('div.recommend-tag > ul span.tag'));
+      const workTagNodes = document.querySelectorAll('div.recommend-tag > ul span.tag');
       const tags = tagsFromNodes(workTagNodes);
 
       return new Work(title, tags);
@@ -109,17 +111,28 @@ export class AutoTagService {
       const prototypeValueSetterOpt = Object.getOwnPropertyDescriptor(proto, key);
       const prototypeValueSetter    = prototypeValueSetterOpt && prototypeValueSetterOpt.set;
 
-      if (valueSetter && valueSetter !== prototypeValueSetter) {
+      if (valueSetter && prototypeValueSetter && valueSetter !== prototypeValueSetter) {
         prototypeValueSetter.call(input, value);
-      } else {
+      } else if (valueSetter) {
         valueSetter.call(input, value);
+      } else {
+        throw new Error('入力欄に値を設定できませんでした。');
       }
       input.dispatchEvent(new Event('input', { bubbles: true }));
     }
   }
 
+  /**
+   * @return {{comment: HTMLInputElement, tag: HTMLInputElement, restrict: HTMLInputElement}}
+   */
   function bookmarkForm() {
-    return document.querySelector('.bookmark-detail-unit > form');
+    const form = document.querySelector('.bookmark-detail-unit > form');
+
+    if (! form) {
+      throw new Error('ブックマークの入力欄が見つけられませんでした。プログラムの修正が必要なため、作者に連絡してください。');
+    }
+
+    return form;
   }
 
   function findBookmark() {
@@ -127,7 +140,7 @@ export class AutoTagService {
 
     return new Bookmark(
       form.comment.value,
-      Tags.fromIterable(form.tag.value.split(/\s*/).map(tagName => Tag.for(tagName))),
+      Tags.fromIterable(form.tag.value.split(/\s*/).map(Tag.for)),
       form.restrict.value === '0' ? BookmarkScope.Public : BookmarkScope.Private,
     );
   }
@@ -149,7 +162,9 @@ export class AutoTagService {
   }
 
   function onLoad() {
+    /** @param {string} url */
     const isIllustPage   = url => /member_illust.php/.test(url);
+    /** @param {string} url */
     const isBookmarkPage = url => /bookmark_add/.test(url);
 
     const observer = new MutationObserver(records => {

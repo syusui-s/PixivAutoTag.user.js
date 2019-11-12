@@ -5,6 +5,10 @@ import hyperx from 'hyperx';
 const hx = hyperx(h);
 
 /**
+ * @typedef {import('./config_store.js').ConfigStore} ConfigStore
+ */
+
+/**
  * 設定に関する状態遷移
  */
 class ConfigState {
@@ -52,14 +56,17 @@ export const state = configRepository => ({
 });
 
 /**
- * @type {(autoTag: () => void, configRepository: ConfigStore) => object}
+ * @param {() => void} autoTag
+ * @param {ConfigStore} configRepository
  */
 export const actions = (autoTag, configRepository) => ({
+  /** @type {() => (state: AppState) => AppState} */
   executeAutoTag: () => state => {
     autoTag();
     return state;
   },
 
+  /** @type {() => (state: AppState) => AppState} */
   configToggle: () => state => {
     const newState = { ...state, configState: state.configState.toggle() };
 
@@ -77,6 +84,10 @@ export const actions = (autoTag, configRepository) => ({
     return newState;
   },
 
+  /**
+   * @typedef {{ ruleRaw: string }} ConfigSaveIn
+   * @type {(arg0: ConfigSaveIn) => (state: AppState) => AppState}
+   */
   configSave: ({ ruleRaw }) => state => {
     const config = Config.create(ruleRaw);
 
@@ -90,13 +101,21 @@ export const actions = (autoTag, configRepository) => ({
     return { ...state, ruleRaw, configState: state.configState.save() };
   },
 
+  /**
+   * @type {() => (state: AppState) => AppState}
+   */
   configUpdate: () => state => (
     { ...state, configState: state.configState.change() }
   ),
 
+  /** @type {() => (state: AppState) => AppState} */
   configDownload: () => state => state,
 });
 
+/**
+ * @param {AppState} state
+ * @param {typeof actions} actions
+ */
 export const view = (state, actions) => {
   const open = state.configState !== ConfigState.Closed;
   const h = hx`
