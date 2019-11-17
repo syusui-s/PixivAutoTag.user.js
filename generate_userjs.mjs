@@ -108,7 +108,6 @@ export default async function generateUserJs() {
     .match('https://www.pixiv.net/bookmark_add.php?*')
     .match('https://www.pixiv.net/novel/show.php?id=*')
     .match('https://www.pixiv.net/novel/bookmark_add.php?id=*')
-    .match('https://www.pixiv.net/bookmark.php*')
     .runAt('document-end')
     .build();
 

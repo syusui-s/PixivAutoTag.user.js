@@ -59,58 +59,72 @@ export const state = configRepository => ({
  * @param {() => void} autoTag
  * @param {ConfigStore} configRepository
  */
-export const actions = (autoTag, configRepository) => ({
-  /** @type {() => (state: AppState) => AppState} */
-  executeAutoTag: () => state => {
-    autoTag();
-    return state;
-  },
+export const actions = (autoTag, configRepository) => {
+  const self = {
+    /** @type {() => (state: AppState) => AppState} */
+    executeAutoTag: () => state => {
+      autoTag();
+      return state;
+    },
 
-  /** @type {() => (state: AppState) => AppState} */
-  configToggle: () => state => {
-    const newState = { ...state, configState: state.configState.toggle() };
+    /** @type {() => (state: AppState) => AppState} */
+    configToggle: () => state => {
+      const newState = { ...state, configState: state.configState.toggle() };
 
-    if (newState.configState === ConfigState.AskClose) {
-      const message = '設定が変更されています。破棄してもよろしいですか？';
-      const result = window.confirm(message);
+      if (newState.configState === ConfigState.AskClose) {
+        const message = '設定が変更されています。破棄してもよろしいですか？';
+        const result = window.confirm(message);
 
-      if (result) {
-        return actions.configDiscardChange()(newState);
-      } else {
-        return actions.configKeepChange()(newState);
+        if (result) {
+          return self.configDiscardChange()(newState);
+        } else {
+          return self.configKeepChange()(newState);
+        }
       }
-    }
 
-    return newState;
-  },
+      return newState;
+    },
 
-  /**
-   * @typedef {{ ruleRaw: string }} ConfigSaveIn
-   * @type {(arg0: ConfigSaveIn) => (state: AppState) => AppState}
-   */
-  configSave: ({ ruleRaw }) => state => {
-    const config = Config.create(ruleRaw);
+    /**
+     * @typedef {{ ruleRaw: string }} ConfigSaveIn
+     * @type {(arg0: ConfigSaveIn) => (state: AppState) => AppState}
+     */
+    configSave: ({ ruleRaw }) => state => {
+      const config = Config.create(ruleRaw);
 
-    try {
-      configRepository.save(config);
-      alert('保存しました');
-    } catch (e) {
-      alert(`保存に失敗しました: ${e}`);
-    }
+      try {
+        configRepository.save(config);
+        alert('保存しました');
+      } catch (e) {
+        alert(`保存に失敗しました: ${e}`);
+      }
 
-    return { ...state, ruleRaw, configState: state.configState.save() };
-  },
+      return { ...state, ruleRaw, configState: state.configState.save() };
+    },
 
-  /**
-   * @type {() => (state: AppState) => AppState}
-   */
-  configUpdate: () => state => (
-    { ...state, configState: state.configState.change() }
-  ),
+    /**
+     * @type {() => (state: AppState) => AppState}
+     */
+    configUpdate: () => state => (
+      { ...state, configState: state.configState.change() }
+    ),
 
-  /** @type {() => (state: AppState) => AppState} */
-  configDownload: () => state => state,
-});
+    /** @type {() => (state: AppState) => AppState} */
+    configDiscardChange: () => state => (
+      { ...state, configState: state.configState.discard() }
+    ),
+
+    /** @type {() => (state: AppState) => AppState} */
+    configKeepChange: () => state => (
+      { ...state, configState: state.configState.keep() }
+    ),
+
+    /** @type {() => (state: AppState) => AppState} */
+    configDownload: () => state => state,
+  };
+
+  return self;
+};
 
 /**
  * @param {AppState} state

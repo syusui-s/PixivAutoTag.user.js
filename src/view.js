@@ -1,12 +1,18 @@
 import { h } from 'hyperapp';
 import hyperx from 'hyperx';
 
+/**
+ * @typedef {import('./ui.js').AppState} AppState
+ */
+
 const hx = hyperx(h);
 
 /**
  * ボタンを描画する
+ *
+ * @param {AppState} state
  */
-export function buttons(actions) {
+export function buttons(actions, state) {
   const configId = 'autotagConfigToggle';
   const autotagId  = 'autotagExec';
 
@@ -28,11 +34,13 @@ export function config(actions, { ruleRaw }) {
   const ruleId = 'autotagConfigForm__Rule';
   const saveId = 'autotagConfigForm__Save';
 
+  /** @type {(event: InputEvent) => void} */
   const onsubmit = event => {
     event.preventDefault();
-    actions.configSave({ ruleRaw: event.target.querySelector(`#${ruleId}`).value });
+    event.target && actions.configSave({ ruleRaw: event.target.querySelector(`#${ruleId}`).value });
   };
 
+  /** @type {(event: InputEvent) => void} */
   const download = event => {
     event.preventDefault();
     actions.configDownload();

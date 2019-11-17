@@ -150,8 +150,11 @@ export class AutoTagService {
     app(ui.state(configStore), ui.actions(autoTag, configStore), ui.view, container);
 
     const prevElem = document.querySelector('.recommend-tag > h1.title');
-    prevElem.parentNode.insertBefore(container, prevElem.nextSibiling);
-
+    if (prevElem && prevElem.parentNode) {
+      prevElem.parentNode.insertBefore(container, prevElem.nextSibling);
+    } else {
+      window.alert('UIの描画に失敗しました。pixivのUIが変更されていると思われます。プログラムの修正が必要なため、作者に連絡してください。');
+    }
   }
 
   function execute() {
@@ -175,13 +178,18 @@ export class AutoTagService {
         setTimeout(execute, 999);
     });
 
+    let target;
     if (isIllustPage(location.href)) {
-      const tagsNode = document.querySelector('section.list-container.tag-container.work-tags-container > div > ul');
-      observer.observe(tagsNode, { childList: true });
-
+      target = document.querySelector('section.list-container.tag-container.work-tags-container > div > ul');
     } else if (isBookmarkPage(location.href)) {
-      const tagCloud = document.querySelector('ul.list-items.tag-cloud.loading-indicator');
-      observer.observe(tagCloud, { childList: true });
+      target = document.querySelector('ul.list-items.tag-cloud.loading-indicator');
+    }
+
+    if (target) {
+      observer.observe(target, { childList: true });
+    } else {
+      // window.alert('タグリストを見つけられませんでした。修正が必要なため、作者に連絡してください。');
+      return;
     }
   }
 
