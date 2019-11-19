@@ -18,7 +18,7 @@
     "url": "git+https://github.com/syusui-s/PixivAutoTag.user.js.git"
   },
   "author": "Shusui MOYATANI",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/syusui-s/PixivAutoTag.user.js/issues"
   },

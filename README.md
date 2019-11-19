@@ -330,4 +330,4 @@ match 百合 ここにジャパリタワーを建てよう
 
 ライセンス
 -----
-Expat (俗に言うMIT LICENSE) で公開します。LICENSEファイルをご覧ください。
+GNU Affero General Public License Version 3 以降で公開します。

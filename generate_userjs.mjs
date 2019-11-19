@@ -74,6 +74,15 @@ Object.assign(UserScriptMetadataBuilder, {
   lastLine:    '==/UserScript==',
 });
 
+const readFile = util.promisify(fs.readFile);
+
+const myLicense = () => readFile('./LICENSE_SHORT', { encoding: 'utf8' });
+
+const commentify = multiLineString => multiLineString
+  .split('\n')
+  .map(line => `// ${line}`)
+  .join('\n');
+
 const generateLicenses = async function() {
   const packages = await new Promise((resolve, reject) =>
     licenseChecker.init({ start: path.resolve(), production: true }, (err, packages) => 
@@ -93,8 +102,6 @@ const generateLicenses = async function() {
   return Promise.all(licenseTexts);
 };
 
-const readFile = util.promisify(fs.readFile);
-
 export default async function generateUserJs() {
   const json = await readFile('./package.json', { encoding: 'utf8' });
   const data = JSON.parse(json);
@@ -111,13 +118,11 @@ export default async function generateUserJs() {
     .runAt('document-end')
     .build();
 
+  const myLicenseText = await myLicense();
   const licensesTexts = await generateLicenses();
   const licenses = licensesTexts
-    .map(({ name, text }) => `\n${name}\n${text}`)
-    .join('\n')
-    .split('\n')
-    .map(line => `// ${line}`)
+    .map(({ name, text }) => commentify(`\n${name}\n${(text)}`))
     .join('\n');
 
-  return banner + licenses;
+  return banner + commentify(myLicenseText) + licenses;
 }
