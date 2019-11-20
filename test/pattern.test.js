@@ -1,4 +1,5 @@
-import { Pattern, Tag, Match } from '../src/domain.js';
+import { Pattern, Match } from '../src/domain/rule.js';
+import { Tag } from '../src/domain/tag.js';
 
 import assert from 'assert';
 
@@ -16,7 +17,7 @@ describe('Pattern', () => {
     it('should return a new Pattern', () => {
       const pattern = Pattern.regexp('[0-9]*');
 
-      assert( pattern instanceof Pattern );
+      assert(pattern instanceof Pattern );
     });
   });
 

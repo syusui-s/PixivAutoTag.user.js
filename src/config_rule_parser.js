@@ -1,4 +1,5 @@
-import { Rule, Rules, Pattern, Tag } from './domain.js';
+import { Rule, Rules, Pattern } from './domain/rule.js';
+import { Tag } from './domain/tag.js';
 
 /** @typedef {import('./domain/rule.js').Action} Action */
 

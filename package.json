@@ -8,9 +8,9 @@
     "build": "rollup --config",
     "build-test": "rollup --config rollup.test.config.js",
     "lint": "eslint src/**/*.js",
-    "lint-fix": "eslint --fix src/**/*.js",
-    "test": "mocha --require source-map-support/register --require ts-node/register test/**/*.js && npm run lint",
-    "test-dev": "mocha --watch build/test/**/*.js",
+    "fix": "eslint --fix src/**/*.js test/**/*.js",
+    "test": "npm run build-test && mocha --require source-map-support/register build/test/**/*.js && npm run lint",
+    "watch": "mocha --require ts-node/register --watch build/test/**/*.js",
     "typecheck": "tsc"
   },
   "repository": {

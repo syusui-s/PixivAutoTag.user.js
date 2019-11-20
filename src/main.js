@@ -1,6 +1,8 @@
 import { ConfigStore } from './config_store.js';
 import { Config } from './config.js';
-import { Bookmark, Tags, Tag, Work, BookmarkScope } from './domain.js';
+import { Bookmark, BookmarkScope } from './domain/bookmark.js';
+import { Work } from './domain/work.js';
+import { Tags, Tag } from './domain/tag.js';
 import * as ui from './ui.js';
 import { app } from 'hyperapp';
 

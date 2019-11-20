@@ -1,7 +1,7 @@
-import {
-  Bookmark, Work,
-  Tag, Tags, Pattern, Rule,
-} from '../src/domain.js';
+import { Tag, Tags } from '../src/domain/tag.js';
+import { Bookmark } from '../src/domain/bookmark.js';
+import { Work } from '../src/domain/work.js';
+import { Pattern, Rule } from '../src/domain/rule.js';
 
 import assert from 'assert';
 

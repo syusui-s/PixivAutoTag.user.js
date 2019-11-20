@@ -1,4 +1,4 @@
-import { Tag, Tags } from '../src/domain.js';
+import { Tag, Tags } from '../src/domain/tag.js';
 
 import assert from 'assert';
 
