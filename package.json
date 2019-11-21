@@ -6,10 +6,9 @@
   "scripts": {
     "dev": "rollup --config --watch",
     "build": "rollup --config",
-    "build-test": "rollup --config rollup.test.config.js",
     "lint": "eslint src/**/*.js",
     "fix": "eslint --fix src/**/*.js test/**/*.js",
-    "test": "npm run build-test && mocha --require source-map-support/register build/test/**/*.js && npm run lint",
+    "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --require ts-node/register ./test/**/*.js && npm run lint",
     "watch": "mocha --require ts-node/register --watch build/test/**/*.js",
     "typecheck": "tsc"
   },
@@ -40,7 +39,6 @@
     "rollup-plugin-multi-entry": "^2.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-typescript2": "^0.24.3",
-    "source-map-support": "^0.5.16",
     "ts-node": "^8.4.1",
     "typescript": "^3.7.2"
   },
