@@ -31,7 +31,9 @@
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-prettier": "^3.1.0",
+    "husky": "^3.1.0",
     "license-checker": "^25.0.1",
+    "lint-staged": "^9.4.3",
     "mocha": "^6.2.2",
     "prettier": "^1.19.0",
     "rollup": "^1.26.3",
@@ -45,5 +47,16 @@
   "dependencies": {
     "hyperapp": "^1.2.10",
     "hyperx": "^2.5.4"
+  },
+  "lint-staged": {
+    "{src,test}/*.js": [
+      "npm run fix",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && npm run test"
+    }
   }
 }
