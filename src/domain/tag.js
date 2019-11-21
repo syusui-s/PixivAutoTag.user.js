@@ -32,7 +32,7 @@ export class Tag {
    * @param {Tag} other
    */
   notEquals(other) {
-    return ! this.equals(other);
+    return !this.equals(other);
   }
 
   toString() {
@@ -80,7 +80,7 @@ export class Tags {
    * @param {Tag[]} tags
    */
   constructor(tags) {
-    this.map = new Map( tags.map(tag => [ tag.text, tag ]) );
+    this.map = new Map(tags.map(tag => [tag.text, tag]));
   }
 
   /**
@@ -89,8 +89,7 @@ export class Tags {
    * @param {Tag} tag
    */
   has(tag) {
-    return tag instanceof Tag &&
-      this.map.has(tag.text);
+    return tag instanceof Tag && this.map.has(tag.text);
   }
 
   /**
@@ -99,8 +98,10 @@ export class Tags {
    * @param {Tags} other
    */
   equals(other) {
-    return other.map.size === this.map.size &&
-      other.toArray().every(tag => this.has(tag));
+    return (
+      other.map.size === this.map.size &&
+      other.toArray().every(tag => this.has(tag))
+    );
   }
 
   /**
@@ -190,5 +191,3 @@ export class Tags {
     return this.map.size === 0;
   }
 }
-
-

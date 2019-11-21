@@ -23,7 +23,9 @@ export class Pattern {
    * @param {string} str
    */
   static exact(str) {
-    const regex = new RegExp(`^${str.replace(/[.*+?^${}()|[\]\\]/g, sym => `\\${sym}`)}$`);
+    const regex = new RegExp(
+      `^${str.replace(/[.*+?^${}()|[\]\\]/g, sym => `\\${sym}`)}$`
+    );
     return new this(regex);
   }
 
@@ -64,8 +66,7 @@ export class Pattern {
     for (const tag of tags.toArray()) {
       const match = this.match(tag);
 
-      if (match.succeeded())
-        return match;
+      if (match.succeeded()) return match;
     }
 
     return Match.failed();
@@ -101,14 +102,14 @@ export class Match {
    * マッチが成功であれば、true
    */
   succeeded() {
-    return !! this.match;
+    return !!this.match;
   }
 
   /**
    * マッチが失敗であれば、true
    */
   failed() {
-    return ! this.match;
+    return !this.match;
   }
 }
 
@@ -152,7 +153,10 @@ export class Rules {
    * @return {Bookmark} 処理したBookmark
    */
   process(work, bookmark) {
-    return this.rules.reduce((accumulatedBookmark, rule) => rule(work)(accumulatedBookmark), bookmark);
+    return this.rules.reduce(
+      (accumulatedBookmark, rule) => rule(work)(accumulatedBookmark),
+      bookmark
+    );
   }
 }
 
@@ -179,8 +183,7 @@ const removeAction = tag => matchResult => bookmark => {
 /**
  * @type {MatchAction}
  */
-const privateAction = () => bookmark =>
-  bookmark.toPrivate();
+const privateAction = () => bookmark => bookmark.toPrivate();
 
 /**
  * いずれかのパターンがいずれかのタグに一致する必要がある
@@ -191,8 +194,7 @@ const forSomePatterns = patterns => action => work => bookmark => {
   let matchResult;
   let someMatched = false;
 
-  patternLoop:
-  for (const pattern of patterns) {
+  patternLoop: for (const pattern of patterns) {
     for (const tag of work.tags.toArray()) {
       const temp = pattern.match(tag);
       if (temp.succeeded()) {
@@ -203,9 +205,7 @@ const forSomePatterns = patterns => action => work => bookmark => {
     }
   }
 
-  return someMatched && matchResult
-    ? action(matchResult)(bookmark)
-    : bookmark;
+  return someMatched && matchResult ? action(matchResult)(bookmark) : bookmark;
 };
 
 /**
@@ -230,14 +230,12 @@ const forAllPatterns = patterns => action => work => bookmark => {
 
     allMatched = allMatched && someMatched;
 
-    if (! allMatched) {
+    if (!allMatched) {
       break;
     }
   }
 
-  return allMatched && matchResult
-    ? action(matchResult)(bookmark)
-    : bookmark;
+  return allMatched && matchResult ? action(matchResult)(bookmark) : bookmark;
 };
 
 /**

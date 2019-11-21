@@ -4,12 +4,11 @@ import { Tag } from '../src/domain/tag.js';
 import assert from 'assert';
 
 describe('Pattern', () => {
-
   describe('.exact', () => {
     it('should return a new Pattern', () => {
       const pattern = Pattern.exact('あああ');
 
-      assert( pattern instanceof Pattern );
+      assert(pattern instanceof Pattern);
     });
   });
 
@@ -17,7 +16,7 @@ describe('Pattern', () => {
     it('should return a new Pattern', () => {
       const pattern = Pattern.regexp('[0-9]*');
 
-      assert(pattern instanceof Pattern );
+      assert(pattern instanceof Pattern);
     });
   });
 
@@ -29,8 +28,8 @@ describe('Pattern', () => {
 
         const match = pattern.match(tag);
 
-        assert( match instanceof Match );
-        assert( match.succeeded() );
+        assert(match instanceof Match);
+        assert(match.succeeded());
       });
     });
 
@@ -41,8 +40,8 @@ describe('Pattern', () => {
 
         const match = pattern.match(tag);
 
-        assert( match instanceof Match );
-        assert( match.failed() );
+        assert(match instanceof Match);
+        assert(match.failed());
       });
     });
   });

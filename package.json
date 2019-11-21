@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "rollup --config --watch",
     "build": "rollup --config",
-    "lint": "eslint src/**/*.js",
+    "lint": "eslint src/**/*.js test/**/*.js",
     "fix": "eslint --fix src/**/*.js test/**/*.js",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --require ts-node/register ./test/**/*.js && npm run lint",
     "watch": "mocha --require ts-node/register --watch build/test/**/*.js",
@@ -25,11 +25,11 @@
   "devDependencies": {
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.7",
-    "@typescript-eslint/eslint-plugin": "^2.6.1",
-    "@typescript-eslint/parser": "^2.6.1",
+    "@typescript-eslint/eslint-plugin": "^2.8.0",
+    "@typescript-eslint/parser": "^2.8.0",
     "chokidar": "^3.3.0",
     "eslint": "^6.6.0",
-    "eslint-config-prettier": "^6.0.0",
+    "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-prettier": "^3.1.0",
     "husky": "^3.1.0",
     "license-checker": "^25.0.1",

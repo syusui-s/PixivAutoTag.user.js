@@ -4,13 +4,10 @@ import assert from 'assert';
 // import util from 'util';
 
 describe('ConfigRuleParser', () => {
-
   const parser = new ConfigRuleParser();
 
   describe('#parse', () => {
-
     describe('when collect rule is given', () => {
-
       it('should parse rule', () => {
         const rule =
           '# 非公開設定\n' +
@@ -23,12 +20,12 @@ describe('ConfigRuleParser', () => {
           'match 卯月 うーちゃん\n' +
           '# 東方\n' +
           'match_all 多々良小傘 東方 小傘\n';
-          // 'addition_pattern_all ~1(アズールレーン) ^アズールレーン|アズレン|碧蓝航线$ ^睦月|如月|卯月|水無月)$';
+        // 'addition_pattern_all ~1(アズールレーン) ^アズールレーン|アズレン|碧蓝航线$ ^睦月|如月|卯月|水無月)$';
 
         const result = parser.parse(rule);
         assert(result.success);
         // console.log(util.inspect(result.success.rules, false, null));
-        
+
         assert(true);
       });
     });

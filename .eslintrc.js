@@ -5,12 +5,28 @@ module.exports = {
     "mocha": true,
     "greasemonkey": true,
   },
-  "extends": "eslint:recommended",
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended",
+    "prettier",
+    "prettier/@typescript-eslint"
+  ],
+  "plugins": [
+    "prettier",
+    "@typescript-eslint",
+  ],
   "parserOptions": {
     "sourceType": "module",
     "ecmaVersion": "2019",
   },
   "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true,
+        "trailingComma": "es5"
+      }
+    ],
     "indent": [
       "error",
       2
