@@ -8,8 +8,7 @@ module.exports = {
   "extends": [
     "eslint:recommended",
     "plugin:prettier/recommended",
-    "prettier",
-    "prettier/@typescript-eslint"
+    "prettier/@typescript-eslint",
   ],
   "plugins": [
     "prettier",
@@ -17,7 +16,7 @@ module.exports = {
   ],
   "parserOptions": {
     "sourceType": "module",
-    "ecmaVersion": "2019",
+    "ecmaVersion": "2020",
   },
   "rules": {
     "prettier/prettier": [
@@ -26,10 +25,6 @@ module.exports = {
         "singleQuote": true,
         "trailingComma": "es5"
       }
-    ],
-    "indent": [
-      "error",
-      2
     ],
     "linebreak-style": [
       "error",

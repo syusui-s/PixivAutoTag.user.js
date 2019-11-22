@@ -14,9 +14,5 @@ export default {
   watch: {
     include: 'src/**/*',
   },
-  plugins: [
-    resolve(),
-    commonjs(),
-    rollupTs2(),
-  ],
+  plugins: [resolve(), commonjs(), rollupTs2()],
 };

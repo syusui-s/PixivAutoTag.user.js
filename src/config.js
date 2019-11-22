@@ -63,8 +63,8 @@ export class Config {
     const date = new Date();
 
     const blob = new Blob([this.toJson()], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    
+    const url = URL.createObjectURL(blob);
+
     a.href = url.toString();
     a.download = `pixiv_auto_tag-${date.getTime()}.txt`;
     a.click();
