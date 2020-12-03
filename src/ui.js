@@ -1,7 +1,8 @@
-import { Config } from './config.js';
-import views from './view.js';
 import { h } from 'hyperapp';
 import hyperx from 'hyperx';
+import { Config } from './config.js';
+import views from './view.js';
+
 const hx = hyperx(h);
 
 /**
@@ -22,18 +23,23 @@ class ConfigState {
   toggle() {
     return this;
   }
+
   change() {
     return this;
   }
+
   save() {
     return this;
   }
+
   reset() {
     return this;
   }
+
   discard() {
     return this;
   }
+
   keep() {
     return this;
   }
@@ -78,7 +84,7 @@ ConfigState.AskClose = new ConfigState({
 /** @typedef {{ configState: ConfigState, ruleRaw: string }} AppState */
 
 /** @type {(configRepository: ConfigStore) => AppState} */
-export const state = configRepository => ({
+export const state = (configRepository) => ({
   configState: ConfigState.Closed,
   ruleRaw: (configRepository.load() || Config.default()).ruleRaw,
 });
@@ -90,13 +96,13 @@ export const state = configRepository => ({
 export const actions = (autoTag, configRepository) => {
   const self = {
     /** @type {() => (state: AppState) => AppState} */
-    executeAutoTag: () => state => {
+    executeAutoTag: () => (state) => {
       autoTag();
       return state;
     },
 
     /** @type {() => (state: AppState) => AppState} */
-    configToggle: () => state => {
+    configToggle: () => (state) => {
       const newState = { ...state, configState: state.configState.toggle() };
 
       if (newState.configState === ConfigState.AskClose) {
@@ -105,9 +111,8 @@ export const actions = (autoTag, configRepository) => {
 
         if (result) {
           return self.configDiscardChange()(newState);
-        } else {
-          return self.configKeepChange()(newState);
         }
+        return self.configKeepChange()(newState);
       }
 
       return newState;
@@ -117,7 +122,7 @@ export const actions = (autoTag, configRepository) => {
      * @typedef {{ ruleRaw: string }} ConfigSaveIn
      * @type {(arg0: ConfigSaveIn) => (state: AppState) => AppState}
      */
-    configSave: ({ ruleRaw }) => state => {
+    configSave: ({ ruleRaw }) => (state) => {
       const config = Config.create(ruleRaw);
 
       try {
@@ -133,25 +138,25 @@ export const actions = (autoTag, configRepository) => {
     /**
      * @type {() => (state: AppState) => AppState}
      */
-    configUpdate: () => state => ({
+    configUpdate: () => (state) => ({
       ...state,
       configState: state.configState.change(),
     }),
 
     /** @type {() => (state: AppState) => AppState} */
-    configDiscardChange: () => state => ({
+    configDiscardChange: () => (state) => ({
       ...state,
       configState: state.configState.discard(),
     }),
 
     /** @type {() => (state: AppState) => AppState} */
-    configKeepChange: () => state => ({
+    configKeepChange: () => (state) => ({
       ...state,
       configState: state.configState.keep(),
     }),
 
     /** @type {() => (state: AppState) => AppState} */
-    configDownload: () => state => state,
+    configDownload: () => (state) => state,
   };
 
   return self;

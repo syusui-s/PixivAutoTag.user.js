@@ -24,7 +24,7 @@ export class Pattern {
    */
   static exact(str) {
     const regex = new RegExp(
-      `^${str.replace(/[.*+?^${}()|[\]\\]/g, sym => `\\${sym}`)}$`
+      `^${str.replace(/[.*+?^${}()|[\]\\]/g, (sym) => `\\${sym}`)}$`,
     );
     return new this(regex);
   }
@@ -155,7 +155,7 @@ export class Rules {
   process(work, bookmark) {
     return this.rules.reduce(
       (accumulatedBookmark, rule) => rule(work)(accumulatedBookmark),
-      bookmark
+      bookmark,
     );
   }
 }
@@ -163,7 +163,7 @@ export class Rules {
 /**
  * @type {TagMatchAction}
  */
-const appendAction = tag => matchResult => bookmark => {
+const appendAction = (tag) => (matchResult) => (bookmark) => {
   // bookmark.tags.$append(tag.resolveReference(matchResult));
   // return bookmark;
   const newTags = bookmark.tags.append(tag.resolveReference(matchResult));
@@ -173,7 +173,7 @@ const appendAction = tag => matchResult => bookmark => {
 /**
  * @type {TagMatchAction}
  */
-const removeAction = tag => matchResult => bookmark => {
+const removeAction = (tag) => (matchResult) => (bookmark) => {
   // bookmark.tags.$remove(tag.resolveReference(matchResult));
   // return bookmark;
   const newTags = bookmark.tags.remove(tag.resolveReference(matchResult));
@@ -183,36 +183,33 @@ const removeAction = tag => matchResult => bookmark => {
 /**
  * @type {MatchAction}
  */
-const privateAction = () => bookmark => bookmark.toPrivate();
+const privateAction = () => (bookmark) => bookmark.toPrivate();
 
 /**
  * いずれかのパターンがいずれかのタグに一致する必要がある
  *
  * @type {(patterns: Pattern[]) => ((action: MatchAction) => Action)}
  */
-const forSomePatterns = patterns => action => work => bookmark => {
-  let matchResult;
-  let someMatched = false;
-
-  patternLoop: for (const pattern of patterns) {
+const forSomePatterns = (patterns) => (action) => (work) => (bookmark) => {
+  let b = bookmark;
+  for (const pattern of patterns) {
     for (const tag of work.tags.toArray()) {
-      const temp = pattern.match(tag);
-      if (temp.succeeded()) {
-        someMatched = true;
-        matchResult = temp;
-        break patternLoop;
+      const matchResult = pattern.match(tag);
+      if (matchResult.succeeded()) {
+        console.log(bookmark.tags.map.keys());
+        b = action(matchResult)(b);
       }
     }
   }
 
-  return someMatched && matchResult ? action(matchResult)(bookmark) : bookmark;
+  return b;
 };
 
 /**
  * すべてのパターンはいずれかのタグに一致する必要がある
  * @type {(patterns: Pattern[]) => ((action: MatchAction) => Action)}
  */
-const forAllPatterns = patterns => action => work => bookmark => {
+const forAllPatterns = (patterns) => (action) => (work) => (bookmark) => {
   let matchResult;
   let allMatched = true;
 

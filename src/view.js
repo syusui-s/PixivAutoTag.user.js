@@ -42,7 +42,7 @@ export function config(actions, { ruleRaw }) {
   const saveId = 'autotagConfigForm__Save';
 
   /** @type {(event: InputEvent) => void} */
-  const onsubmit = event => {
+  const onsubmit = (event) => {
     event.preventDefault();
     event.target &&
       actions.configSave({
@@ -51,7 +51,7 @@ export function config(actions, { ruleRaw }) {
   };
 
   /** @type {(event: InputEvent) => void} */
-  const download = event => {
+  const download = (event) => {
     event.preventDefault();
     actions.configDownload();
   };

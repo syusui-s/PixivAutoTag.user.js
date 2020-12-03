@@ -1,9 +1,8 @@
+import assert from 'assert';
 import { Tag, Tags } from '../src/domain/tag.js';
 import { Bookmark } from '../src/domain/bookmark.js';
 import { Work } from '../src/domain/work.js';
 import { Pattern, Rule } from '../src/domain/rule.js';
-
-import assert from 'assert';
 
 describe('Rule', () => {
   const tagStr = 'タグ';

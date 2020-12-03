@@ -1,7 +1,6 @@
+import assert from 'assert';
 import { Pattern, Match } from '../src/domain/rule.js';
 import { Tag } from '../src/domain/tag.js';
-
-import assert from 'assert';
 
 describe('Pattern', () => {
   describe('.exact', () => {

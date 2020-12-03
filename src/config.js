@@ -28,7 +28,7 @@ export class Config {
 
   static default() {
     return new this(
-      '# 設定例: https://github.com/syusui-s/PixivAutoTag.user.js#%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB'
+      '# 設定例: https://github.com/syusui-s/PixivAutoTag.user.js#%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB',
     );
   }
 

@@ -81,10 +81,10 @@ export class ConfigRuleParser {
           const tag = Tag.for(tagName.substr(isRemove ? 1 : 0));
 
           // TODO 激ヤバコードなのでいつか直す
-          const AppendSome = 0,
-            AppendAll = 1,
-            RemoveSome = 2,
-            RemoveAll = 3;
+          const AppendSome = 0;
+          const AppendAll = 1;
+          const RemoveSome = 2;
+          const RemoveAll = 3;
           let ruleFactory;
           switch ((Number(isRemove) << 1) + Number(!!all)) {
             case AppendSome:
@@ -101,7 +101,7 @@ export class ConfigRuleParser {
               break;
             default:
               throw new Error(
-                `実装上漏れのあるケースがあります: isRemove: ${isRemove} all: ${all}`
+                `実装上漏れのあるケースがあります: isRemove: ${isRemove} all: ${all}`,
               );
           }
 
@@ -110,7 +110,7 @@ export class ConfigRuleParser {
             case 'match_all':
               {
                 const patterns =
-                  patternStrs && patternStrs.map(tag => Pattern.exact(tag));
+                  patternStrs && patternStrs.map((tag) => Pattern.exact(tag));
                 rules.push(ruleFactory(tag, patterns));
               }
               break;
@@ -118,7 +118,7 @@ export class ConfigRuleParser {
             case 'pattern_all':
               {
                 const patterns =
-                  patternStrs && patternStrs.map(tag => Pattern.regexp(tag));
+                  patternStrs && patternStrs.map((tag) => Pattern.regexp(tag));
                 rules.push(ruleFactory(tag, patterns));
               }
               break;
@@ -127,8 +127,8 @@ export class ConfigRuleParser {
               errors.push(
                 new ConfigRuleParseError(
                   num + 1,
-                  `申し訳ありませんが、addition_patternルールに対応していません。内容: ${line}`
-                )
+                  `申し訳ありませんが、addition_patternルールに対応していません。内容: ${line}`,
+                ),
               );
               break;
             default:
@@ -136,19 +136,18 @@ export class ConfigRuleParser {
           }
         } else if (parsed.length >= 2 && parsed[0].match(/^private$/i)) {
           // 非公開タグ
-          const rules = parsed.slice(1).map(tag => Pattern.exact(tag));
+          const rules = parsed.slice(1).map((tag) => Pattern.exact(tag));
           privateRule.push(Rule.privateSome(rules));
         } else if (line.match(/^\s*$|^\s*#/)) {
           // 空行 or コメント行
           // nothing to do
         } else {
           errors.push({
-            lineNumber: (num + 1),
+            lineNumber: num + 1,
             message: `不正なコマンドを使用しているか、コマンドへの引数が少なすぎます。内容: ${line}`,
           });
-          return;
         }
-      }
+      },
     );
 
     if (errors.length !== 0) {
@@ -161,8 +160,8 @@ export class ConfigRuleParser {
           .concat(patternRule)
           .concat(patternAllRule)
           .concat(additionRule)
-          .concat(additionAllRule)
-      )
+          .concat(additionAllRule),
+      ),
     );
   }
 }

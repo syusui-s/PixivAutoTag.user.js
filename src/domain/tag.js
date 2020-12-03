@@ -80,7 +80,7 @@ export class Tags {
    * @param {Tag[]} tags
    */
   constructor(tags) {
-    this.map = new Map(tags.map(tag => [tag.text, tag]));
+    this.map = new Map(tags.map((tag) => [tag.text, tag]));
   }
 
   /**
@@ -100,7 +100,7 @@ export class Tags {
   equals(other) {
     return (
       other.map.size === this.map.size &&
-      other.toArray().every(tag => this.has(tag))
+      other.toArray().every((tag) => this.has(tag))
     );
   }
 
@@ -132,7 +132,7 @@ export class Tags {
    * @param {Tags} other
    */
   diff(other) {
-    const tags = this.toArray().filter(key => !other.has(key));
+    const tags = this.toArray().filter((key) => !other.has(key));
     return new Tags(tags);
   }
 
@@ -142,7 +142,7 @@ export class Tags {
    * @param {Tags} other
    */
   intersect(other) {
-    const tags = this.toArray().filter(key => other.has(key));
+    const tags = this.toArray().filter((key) => other.has(key));
     return new Tags(tags);
   }
 
@@ -173,7 +173,7 @@ export class Tags {
    * @return {Tags} 新しいタグ
    */
   remove(tag) {
-    return new Tags(this.toArray().filter(e => e.notEquals(tag)));
+    return new Tags(this.toArray().filter((e) => e.notEquals(tag)));
   }
 
   /**

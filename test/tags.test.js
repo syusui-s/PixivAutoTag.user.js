@@ -1,6 +1,5 @@
-import { Tag, Tags } from '../src/domain/tag.js';
-
 import assert from 'assert';
+import { Tag, Tags } from '../src/domain/tag.js';
 
 const tagsArrayA = [
   '艦隊これくしょん',
@@ -8,17 +7,17 @@ const tagsArrayA = [
   '卯月',
   '卯月(艦隊これくしょん)',
   '艦隊これくしょん',
-].map(txt => Tag.for(txt));
+].map((txt) => Tag.for(txt));
 
-const tagsArrayB = ['艦隊これくしょん', '卯月', '艦これかわいい'].map(txt =>
-  Tag.for(txt)
+const tagsArrayB = ['艦隊これくしょん', '卯月', '艦これかわいい'].map((txt) =>
+  Tag.for(txt),
 );
 
-const tagsArrayDiff = ['艦これ', '卯月(艦隊これくしょん)'].map(txt =>
-  Tag.for(txt)
+const tagsArrayDiff = ['艦これ', '卯月(艦隊これくしょん)'].map((txt) =>
+  Tag.for(txt),
 );
 
-const tagsArrayCommon = ['艦隊これくしょん', '卯月'].map(txt => Tag.for(txt));
+const tagsArrayCommon = ['艦隊これくしょん', '卯月'].map((txt) => Tag.for(txt));
 
 const tagsArrayUnion = tagsArrayA.concat(tagsArrayB);
 
@@ -36,7 +35,7 @@ describe('Tags', () => {
   describe('#toArray', () => {
     it('should return array of Tag', () => {
       assert(
-        tagsA.toArray().every((tag, index) => tagsArrayA[index].equals(tag))
+        tagsA.toArray().every((tag, index) => tagsArrayA[index].equals(tag)),
       );
       assert.equal(tagsA.toArray().length, 4);
 
@@ -47,8 +46,8 @@ describe('Tags', () => {
   describe('#has', () => {
     describe('when it contains a given tag', () => {
       it('should return true', () => {
-        assert(tagsArrayA.every(tag => tagsA.has(tag)));
-        assert(tagsArrayB.every(tag => tagsB.has(tag)));
+        assert(tagsArrayA.every((tag) => tagsA.has(tag)));
+        assert(tagsArrayB.every((tag) => tagsB.has(tag)));
       });
     });
 
