@@ -196,7 +196,6 @@ const forSomePatterns = (patterns) => (action) => (work) => (bookmark) => {
     for (const tag of work.tags.toArray()) {
       const matchResult = pattern.match(tag);
       if (matchResult.succeeded()) {
-        console.log(bookmark.tags.map.keys());
         b = action(matchResult)(b);
       }
     }

@@ -12,9 +12,13 @@ describe('ConfigRuleParser', () => {
         const rule =
           '# 非公開設定\n' +
           'private R-18 R-18G R-17.9 R-15\n' +
+          '\n' +
           '# 一般\n' +
           'pattern オリジナル オリジナル\n' +
           '# 艦これ\n' +
+          'match       -~1 艦これ\n' +
+          'match_all   アリス・キャロル ARIA アリス\n' +
+          'match_all   -アリス          ARIA アリス\n' +
           'pattern_all ~1 ^艦これ$|^艦隊これくしょん$ ^(.+)(改|改二)$\n' +
           'pattern     ~1 ^(.+)(艦隊これくしょん)$\n' +
           'match 卯月 うーちゃん\n' +
@@ -25,8 +29,16 @@ describe('ConfigRuleParser', () => {
         const result = parser.parse(rule);
         assert(result.success);
         // console.log(util.inspect(result.success.rules, false, null));
+      });
+    });
 
-        assert(true);
+    describe('when invalid rule is given', () => {
+      it('should ends up with error', () => {
+        const rule = 'macth_all 多々良小傘 東方 小傘\n';
+
+        const result = parser.parse(rule);
+        assert(!result.success);
+        // console.log(util.inspect(result.success.rules, false, null));
       });
     });
   });

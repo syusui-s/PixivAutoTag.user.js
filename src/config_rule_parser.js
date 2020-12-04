@@ -142,10 +142,12 @@ export class ConfigRuleParser {
           // 空行 or コメント行
           // nothing to do
         } else {
-          errors.push({
-            lineNumber: num + 1,
-            message: `不正なコマンドを使用しているか、コマンドへの引数が少なすぎます。内容: ${line}`,
-          });
+          errors.push(
+            new ConfigRuleParseError(
+              num + 1,
+              `不正なコマンドを使用しているか、コマンドへの引数が少なすぎます。内容: ${line}`,
+            ),
+          );
         }
       },
     );

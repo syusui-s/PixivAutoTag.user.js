@@ -84,7 +84,14 @@ export class Tags {
   }
 
   /**
-   * 引数のタグを自身が持っている時にtrueを返す
+   * 自身の持つタグの個数を返す
+   */
+  size() {
+    return this.map.size;
+  }
+
+  /**
+   * 自身が引数のタグを持っている時にtrueを返す
    *
    * @param {Tag} tag
    */

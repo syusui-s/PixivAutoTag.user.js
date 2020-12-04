@@ -14,11 +14,11 @@ describe('Rule', () => {
   const work = new Work('作品名', Tags.fromArgs(tag, tag1));
 
   describe('.appendSome', () => {
-    const ruleMatch = Rule.appendSome(Tag.for('追加タグ'), [
+    const ruleMatch = Rule.appendSome(Tag.for('追加~0'), [
       Pattern.exact('マッチしない1'),
       Pattern.exact('マッチしない2'),
       Pattern.exact('マッチしない3'),
-      Pattern.exact('タグ'),
+      Pattern.regexp('^タグ1?$'),
     ]);
 
     const ruleNotMatch = Rule.appendSome(Tag.for('追加タグ'), [
@@ -28,9 +28,11 @@ describe('Rule', () => {
     describe('#process', () => {
       describe('when rule matches a tag', () => {
         it('should return bookmark which has a tag', () => {
-          const tag = Tag.for('追加タグ');
+          const appendedTag = Tag.for('追加タグ');
+          const appendedTag1 = Tag.for('追加タグ1');
           const resultBookmark = ruleMatch(work)(Bookmark.empty());
-          assert(resultBookmark.tags.has(tag));
+          assert(resultBookmark.tags.has(appendedTag));
+          assert(resultBookmark.tags.has(appendedTag1));
         });
       });
 
