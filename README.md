@@ -1,5 +1,5 @@
-# PixivAutoTag.user.js
-Pixivでブックマークタグ付け自動化してくれるUserScriptを書いたぞ！！
+# PixivAutoTag.user.js : Add tags to pixiv bookmark automatically 
+ブックマークした時に自動でpixivのタグを設定します。
 
 かなり細かくタグ付けルールを設定できるのでブックマークが捗ります。
 
